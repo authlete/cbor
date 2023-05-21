@@ -216,6 +216,7 @@ byte[] input = {
         (byte)0x99, (byte)0x99, (byte)0x99, (byte)0x99,
         (byte)0x9A
 };
+```
 
 #### Boolean
 
