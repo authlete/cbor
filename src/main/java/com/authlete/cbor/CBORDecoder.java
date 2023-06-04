@@ -220,6 +220,38 @@ public class CBORDecoder
     }
 
 
+    /**
+     * Read all the CBOR data items from the input stream.
+     *
+     * @return
+     *         A list of CBOR data items read from the input stream.
+     *
+     * @throws IOException
+     *
+     * @since 1.1
+     */
+    public List<CBORItem> all() throws IOException
+    {
+        List<CBORItem> list = new ArrayList<>();
+
+        while (true)
+        {
+            // Get the next CBOR data item from the input stream.
+            CBORItem item = next();
+
+            // If the end of the input stream has been reached.
+            if (item == null)
+            {
+                break;
+            }
+
+            list.add(item);
+        }
+
+        return list;
+    }
+
+
     private CBORToken<?> nextToken() throws IOException
     {
         // Get the next CBOR token.

@@ -18,6 +18,8 @@ package com.authlete.cbor;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -124,18 +126,12 @@ public class CBORByteArray extends CBORValue<byte[]>
     {
         try
         {
-            // Decode the content of this byte string as a CBOR data item.
-            CBORItem item = decodeValue();
-
-            // If the content of this byte string is empty.
-            if (item == null)
-            {
-                // Return the hex representation.
-                return "h''";
-            }
+            // Decode the content of this byte string as a list of CBOR data items.
+            List<CBORItem> items = decodeValue();
 
             // Return the representation of the content enclosed with "<<" and ">>".
-            return String.format("<<%s>>", item.toString());
+            return items.stream().map(CBORItem::toString)
+                    .collect(Collectors.joining(", ", "<<", ">>"));
         }
         catch (CBORDecoderException cause)
         {
@@ -182,22 +178,22 @@ public class CBORByteArray extends CBORValue<byte[]>
      * Decode the content of this byte string as a CBOR data item.
      *
      * @return
-     *         A CBOR data item. If the value of this byte string is null or
-     *         an empty byte array, {@code null} is returned.
+     *         A list of CBOR data items. If the value of this byte string is
+     *         null or an empty byte array, an empty list is returned.
      *
      * @throws CBORDecoderException
      *         The content failed to be parsed as a CBOR data item.
      *
      * @since 1.1
      */
-    public CBORItem decodeValue() throws CBORDecoderException
+    public List<CBORItem> decodeValue() throws CBORDecoderException
     {
         // The content of this byte string.
         byte[] value = getValue();
 
         if (value == null || value.length == 0)
         {
-            return null;
+            return List.of();
         }
 
         // Create a decoder without tag processors.
@@ -205,8 +201,8 @@ public class CBORByteArray extends CBORValue<byte[]>
 
         try
         {
-            // Decode the content as a CBOR data item.
-            return decoder.next();
+            // Read all the CBOR data items.
+            return decoder.all();
         }
         catch (CBORDecoderException cause)
         {

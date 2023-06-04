@@ -219,6 +219,14 @@ public class CBORDecodingTest
     }
 
 
+    private static void testByteArrayToString(String expected, String inputHex, boolean decodable)
+    {
+        CBORByteArray ba = new CBORByteArray(fromHex(inputHex), decodable);
+
+        assertEquals(expected, ba.toString());
+    }
+
+
     @Test
     public void test_rfc8949_appendixA_00()
     {
@@ -1415,5 +1423,35 @@ public class CBORDecodingTest
     public void test_half_precision_19()
     {
         testFloat((float)Math.pow(2, -16), "f90100");
+    }
+
+
+    @Test
+    public void test_rfc8610_appendixG_3_1()
+    {
+        testByteArrayToString("h'01'", "01", false);
+        testByteArrayToString("<<1>>", "01", true);
+    }
+
+
+    @Test
+    public void test_rfc8610_appendixG_3_2()
+    {
+        testByteArrayToString("<<1, 2>>", "0102", true);
+    }
+
+
+    @Test
+    public void test_rfc8610_appendixG_3_3()
+    {
+        testByteArrayToString("<<\"foo\", null>>", "63666F6FF6", true);
+    }
+
+
+    @Test
+    public void test_rfc8610_appendixG_3_4()
+    {
+        testByteArrayToString("h''", "", false);
+        testByteArrayToString("<<>>", "", true);
     }
 }

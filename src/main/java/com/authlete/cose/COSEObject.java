@@ -301,9 +301,12 @@ public abstract class COSEObject extends CBORItemList
 
         try
         {
-            // If the content of the byte string can be decoded
-            // as a CBOR data item.
-            if (bstr.decodeValue() != null)
+            // Try to decode the content of the byte string as
+            // CBOR data items.
+            List<CBORItem> items = bstr.decodeValue();
+
+            // If the byte array contains one or more CBOR data items.
+            if (items != null && items.size() != 0)
             {
                 // Create a new byte string marked as decodable.
                 return new CBORByteArray(bstr.getValue(), true);
