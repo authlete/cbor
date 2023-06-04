@@ -250,7 +250,7 @@ public class COSESigningTest
 
 
     @Test
-    public void test_signing() throws COSEException
+    public void test_signing_01() throws COSEException
     {
         byte[] data  = "test".getBytes(StandardCharsets.UTF_8);
         byte[] data2 = "test2".getBytes(StandardCharsets.UTF_8);
@@ -266,5 +266,53 @@ public class COSESigningTest
         // Verify; the result should be invalid.
         valid = COSEVerifier.verify(EC_PUBLIC_KEY_11, alg, data2, signature);
         assertFalse("Signature verification failed.", valid);
+    }
+
+
+    @Test
+    public void test_signing_02() throws COSEException
+    {
+        // Signature algorithm
+        int algorithm = COSEAlgorithms.ES256;
+
+        // Protected header
+        COSEProtectedHeader protectedHeader =
+                new COSEProtectedHeaderBuilder().alg(algorithm).build();
+
+        // Unprotected header
+        COSEUnprotectedHeader unprotectedHeader =
+                new COSEUnprotectedHeaderBuilder().kid("11").build();
+
+        // Payload
+        String payload = "This is the content.";
+
+        // Sig_structure
+        SigStructure structure = new SigStructureBuilder()
+                .signature1()
+                .bodyAttributes(protectedHeader)
+                .payload(payload)
+                .build();
+
+        // Signer
+        COSESigner signer = new COSESigner(EC_PRIVATE_KEY_11);
+
+        // Signature
+        byte[] signature = signer.sign(structure, algorithm);
+
+        // COSESign1
+        COSESign1 sign1 = new COSESign1Builder()
+                .protectedHeader(protectedHeader)
+                .unprotectedHeader(unprotectedHeader)
+                .payload(payload)
+                .signature(signature)
+                .build();
+
+        // Verifier
+        COSEVerifier verifier = new COSEVerifier(EC_PUBLIC_KEY_11);
+
+        // Verification
+        boolean valid = verifier.verify(sign1);
+
+        assertTrue("Signature verification failed.", valid);
     }
 }
