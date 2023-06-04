@@ -18,6 +18,8 @@ package com.authlete.cbor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -109,6 +111,38 @@ public class CBORParser
 
         // Let the CBOR data item parse itself.
         return item.parse();
+    }
+
+
+    /**
+     * Read all the CBOR data items from the input stream.
+     *
+     * @return
+     *         A list of CBOR data items read from the input stream.
+     *
+     * @throws IOException
+     *
+     * @since 1.1
+     */
+    public List<Object> all() throws IOException
+    {
+        List<Object> items = new ArrayList<>();
+
+        while (true)
+        {
+            // Get the next CBOR data item from the input stream.
+            Object item = next();
+
+            // If the end of the input stream has been reached.
+            if (item == null)
+            {
+                break;
+            }
+
+            items.add(item);
+        }
+
+        return items;
     }
 
 
