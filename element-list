@@ -1,3 +1,6 @@
 com.authlete.cbor
 com.authlete.cbor.tag
 com.authlete.cbor.token
+com.authlete.cose
+com.authlete.cose.constants
+com.authlete.cwt
