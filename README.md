@@ -44,7 +44,7 @@ Check the [CHANGES.md](CHANGES.md) file to know the latest version.
 
 ## JavaDoc
 
-  <code>https://authlete.github.io/cbor</code>
+  <code>https://authlete.github.io/cbor/index.html?overview-summary.html</code>
 
 ## Standard Specifications
 
