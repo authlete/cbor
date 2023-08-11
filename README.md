@@ -67,6 +67,7 @@ The list does not necessarily mean that this library supports all of them.
 - [RFC 9053][RFC_9053] CBOR Object Signing and Encryption (COSE): Initial Algorithms
 - [RFC 9090][RFC_9090] Concise Binary Object Representation (CBOR) Tags for Object Identifiers
 - [RFC 9338][RFC_9338] CBOR Object Signing and Encryption (COSE): Countersignatures
+- [RFC 9360][RFC_9360] CBOR Object Signing and Encryption (COSE): Header Parameters for Carrying and Referencing X.509 Certificates
 
 ### IANA Assignments
 
@@ -1140,6 +1141,7 @@ Authlete Contact Form: https://www.authlete.com/contact/
 [RFC_9053]: https://www.rfc-editor.org/rfc/rfc9053.html
 [RFC_9090]: https://www.rfc-editor.org/rfc/rfc9090.html
 [RFC_9338]: https://www.rfc-editor.org/rfc/rfc9338.html
+[RFC_9360]: https://www.rfc-editor.org/rfc/rfc9360.html
 
 [IANA_cbor_simple_values]: https://www.iana.org/assignments/cbor-simple-values/cbor-simple-values.xhtml
 [IANA_cbor_tags]: https://www.iana.org/assignments/cbor-tags/cbor-tags.xhtml
