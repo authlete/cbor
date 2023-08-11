@@ -16,7 +16,11 @@
 package com.authlete.cose;
 
 
+import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +44,9 @@ import com.authlete.cose.constants.COSEHeaderParameters;
  */
 class HeaderValidator
 {
+    private static final String X509 = "X.509";
+
+
     static Map<Object, Object> validate(List<CBORPair> pairs, boolean unprotected)
     {
         Map<Object, Object> parameters = new LinkedHashMap<>();
@@ -82,19 +89,26 @@ class HeaderValidator
                     label.toString()));
         }
 
+        // The parsed value of the parameter.
+        Object value;
+
         // If the label is an integer that is in the range of Java 'int'.
         if (label instanceof Integer)
         {
             // Validate the value if the label is a known one.
-            validateKnownParameter((Integer)label, pair.getValue(), unprotected);
+            value = validateKnownParameter((Integer)label, pair.getValue(), unprotected);
+        }
+        else
+        {
+            value = parseValue(pair.getValue());
         }
 
         // Add the label-value pair.
-        parameters.put(label, pair.getValue().parse());
+        parameters.put(label, value);
     }
 
 
-    private static void validateKnownParameter(
+    private static Object validateKnownParameter(
             int label, CBORItem value, boolean unprotected)
     {
         switch (label)
@@ -123,9 +137,20 @@ class HeaderValidator
                 validatePartialIv(value);
                 break;
 
+            case COSEHeaderParameters.X5CHAIN:
+                return validateX5Chain(value);
+
             default:
                 break;
         }
+
+        return parseValue(value);
+    }
+
+
+    private static Object parseValue(CBORItem value)
+    {
+        return (value != null) ? value.parse() : null;
     }
 
 
@@ -275,6 +300,92 @@ class HeaderValidator
         {
             // This should not happen.
             return false;
+        }
+    }
+
+
+    private static List<X509Certificate> validateX5Chain(CBORItem value)
+    {
+        // If the value of the 'x5chain' parameter is a single byte string.
+        if (value instanceof CBORByteArray)
+        {
+            return validateX5ChainSingle(((CBORByteArray)value).getValue());
+        }
+        // If the value of the 'x5chain' parameter is an array of byte strings.
+        else if (value instanceof CBORItemList)
+        {
+            return validateX5ChainArray(((CBORItemList)value).getItems());
+        }
+        else
+        {
+            throw new IllegalArgumentException("x5chain (33) must be either a byte string or an array of byte strings.");
+        }
+    }
+
+
+    private static List<X509Certificate> validateX5ChainSingle(byte[] der)
+    {
+        if (der == null)
+        {
+            throw new IllegalArgumentException("x5chain (33) must not be a byte string with an empty value.");
+        }
+
+        // Convert the certificate in the DER format into an instance of
+        // the X509Certificate class.
+        X509Certificate cert = buildCertificate(der);
+
+        return List.of(cert);
+    }
+
+
+    private static List<X509Certificate> validateX5ChainArray(List<CBORItem> items)
+    {
+        if (items == null || items.size() == 0)
+        {
+            throw new IllegalArgumentException("x5chain (33) must not be empty.");
+        }
+
+        List<X509Certificate> certs = new ArrayList<>();
+
+        // For each element in the "x5chain" array.
+        for (CBORItem item : items)
+        {
+            // If the element is not a byte string.
+            if (!(item instanceof CBORByteArray))
+            {
+                throw new IllegalArgumentException("x5chain (33) contains an element that is not a byte string.");
+            }
+
+            // A certificate in the DER format.
+            byte[] der = ((CBORByteArray)item).getValue();
+
+            if (der == null)
+            {
+                throw new IllegalArgumentException("x5chain (33) contains a byte string with an empty value.");
+            }
+
+            // Convert the certificate in the DER format into an instance of
+            // the X509Certificate class and add the instance to the list.
+            certs.add(buildCertificate(der));
+        }
+
+        return certs;
+    }
+
+
+    private static X509Certificate buildCertificate(byte[] der)
+    {
+        try
+        {
+            // Convert the byte array in the DER format into an instance of
+            // the X509Certificate class. Note that every implementation of
+            // the Java platform is required to support "X.509".
+            return (X509Certificate)CertificateFactory.getInstance(X509)
+                    .generateCertificate(new ByteArrayInputStream(der));
+        }
+        catch (Exception cause)
+        {
+            throw new IllegalArgumentException("x5chain (33) contains a malformed certificate.");
         }
     }
 }

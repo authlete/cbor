@@ -21,6 +21,8 @@ import static com.authlete.cose.constants.COSEHeaderParameters.CONTENT_TYPE;
 import static com.authlete.cose.constants.COSEHeaderParameters.IV;
 import static com.authlete.cose.constants.COSEHeaderParameters.KID;
 import static com.authlete.cose.constants.COSEHeaderParameters.PARTIAL_IV;
+import static com.authlete.cose.constants.COSEHeaderParameters.X5CHAIN;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 import com.authlete.cbor.CBORItem;
@@ -46,6 +48,7 @@ public class COSEUnprotectedHeader extends CBORPairList
     private byte[] kid;
     private byte[] iv;
     private byte[] partialIv;
+    private List<X509Certificate> x5chain;
 
 
     /**
@@ -92,6 +95,7 @@ public class COSEUnprotectedHeader extends CBORPairList
     }
 
 
+    @SuppressWarnings("unchecked")
     private void initializeField(int label, Object value)
     {
         // Set up the instance field that corresponds to the label.
@@ -115,6 +119,10 @@ public class COSEUnprotectedHeader extends CBORPairList
 
             case PARTIAL_IV:
                 partialIv = (byte[])value;
+                break;
+
+            case X5CHAIN:
+                x5chain = (List<X509Certificate>)value;
                 break;
 
             default:
@@ -210,6 +218,21 @@ public class COSEUnprotectedHeader extends CBORPairList
     public byte[] getPartialIv()
     {
         return partialIv;
+    }
+
+
+    /**
+     * Get the value of the "x5chain (33)" parameter.
+     *
+     * @return
+     *         The value of the "x5chain (33)" parameter. If the header does
+     *         not contain the parameter, {@code null} is returned.
+     *
+     * @since 1.2
+     */
+    public List<X509Certificate> getX5Chain()
+    {
+        return x5chain;
     }
 
 

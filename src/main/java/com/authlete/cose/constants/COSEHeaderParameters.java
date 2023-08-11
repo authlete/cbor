@@ -27,6 +27,7 @@ package com.authlete.cose.constants;
  *     <th>Label</th>
  *     <th>Value Type</th>
  *     <th>Description</th>
+ *     <th>Reference</th>
  *   </tr>
  *
  *   <tr>
@@ -34,6 +35,7 @@ package com.authlete.cose.constants;
  *     <td>1</td>
  *     <td>int / tstr</td>
  *     <td>Cryptographic algorithm to use</td>
+ *     <td><a href="https://www.rfc-editor.org/rfc/rfc9052.html">RFC 9052</a></td>
  *   </tr>
  *
  *   <tr>
@@ -41,6 +43,7 @@ package com.authlete.cose.constants;
  *     <td>2</td>
  *     <td>[+ label]</td>
  *     <td>Critical headers to be understood</td>
+ *     <td><a href="https://www.rfc-editor.org/rfc/rfc9052.html">RFC 9052</a></td>
  *   </tr>
  *
  *   <tr>
@@ -48,6 +51,7 @@ package com.authlete.cose.constants;
  *     <td>3</td>
  *     <td>tstr / uint</td>
  *     <td>Content type of the payload</td>
+ *     <td><a href="https://www.rfc-editor.org/rfc/rfc9052.html">RFC 9052</a></td>
  *   </tr>
  *
  *   <tr>
@@ -55,6 +59,7 @@ package com.authlete.cose.constants;
  *     <td>4</td>
  *     <td>bstr</td>
  *     <td>Key identifier</td>
+ *     <td><a href="https://www.rfc-editor.org/rfc/rfc9052.html">RFC 9052</a></td>
  *   </tr>
  *
  *   <tr>
@@ -62,6 +67,7 @@ package com.authlete.cose.constants;
  *     <td>5</td>
  *     <td>bstr</td>
  *     <td>Full Initialization Vector</td>
+ *     <td><a href="https://www.rfc-editor.org/rfc/rfc9052.html">RFC 9052</a></td>
  *   </tr>
  *
  *   <tr>
@@ -69,6 +75,15 @@ package com.authlete.cose.constants;
  *     <td>6</td>
  *     <td>bstr</td>
  *     <td>Partial Initialization Vector</td>
+ *     <td><a href="https://www.rfc-editor.org/rfc/rfc9052.html">RFC 9052</a></td>
+ *   </tr>
+ *
+ *   <tr>
+ *     <td>{@link #X5CHAIN x5chain}</td>
+ *     <td>33</td>
+ *     <td>COSE_X509</td>
+ *     <td>An ordered chain of X.509 certificates</td>
+ *     <td><a href="https://www.rfc-editor.org/rfc/rfc9360.html">RFC 9360</a></td>
  *   </tr>
  *
  * </table>
@@ -81,23 +96,45 @@ package com.authlete.cose.constants;
  */
 public final class COSEHeaderParameters
 {
-    /** alg (1) */
+    /**
+     * alg (1)
+     */
     public static final int ALG = 1;
 
-    /** crit (2) */
+    /**
+     * crit (2)
+     */
     public static final int CRIT = 2;
 
-    /** content type (3) */
+    /**
+     * content type (3)
+     */
     public static final int CONTENT_TYPE = 3;
 
-    /** kid (4) */
+    /**
+     * kid (4)
+     */
     public static final int KID = 4;
 
-    /** IV (5) */
+    /**
+     * IV (5)
+     */
     public static final int IV = 5;
 
-    /** Partial IV (6) */
+    /**
+     * Partial IV (6)
+     */
     public static final int PARTIAL_IV = 6;
+
+    /**
+     * x5chain (33)
+     *
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc9360.html"
+     *      >RFC 9360 CBOR Object Signing and Encryption (COSE): Header Parameters for Carrying and Referencing X.509 Certificates</a>
+     *
+     * @since 1.2
+     */
+    public static final int X5CHAIN = 33;
 
 
     private COSEHeaderParameters()
