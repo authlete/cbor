@@ -33,6 +33,30 @@ import java.util.Map;
  *   </tr>
  *
  *   <tr>
+ *     <td>{@link #RS512}</td>
+ *     <td>-259</td>
+ *     <td>RSASSA-PKCS1-v1_5 using SHA-512</td>
+ *   </tr>
+ *
+ *   <tr>
+ *     <td>{@link #RS384}</td>
+ *     <td>-258</td>
+ *     <td>RSASSA-PKCS1-v1_5 using SHA-384</td>
+ *   </tr>
+ *
+ *   <tr>
+ *     <td>{@link #RS256}</td>
+ *     <td>-257</td>
+ *     <td>RSASSA-PKCS1-v1_5 using SHA-256</td>
+ *   </tr>
+ *
+ *   <tr>
+ *     <td>{@link #ES256K}</td>
+ *     <td>-47</td>
+ *     <td>ECDSA using secp256k1 curve and SHA-256</td>
+ *   </tr>
+ *
+ *   <tr>
  *     <td>{@link #PS512}</td>
  *     <td>-39</td>
  *     <td>RSASSA-PSS w/ SHA-512</td>
@@ -85,6 +109,34 @@ import java.util.Map;
 public final class COSEAlgorithms
 {
     /**
+     * RS512 (-259); RSASSA-PKCS1-v1_5 using SHA-512
+     *
+     * @since 1.3
+     */
+    public static final int RS512 = -259;
+
+    /**
+     * RS384 (-258); RSASSA-PKCS1-v1_5 using SHA-384
+     *
+     * @since 1.3
+     */
+    public static final int RS384 = -258;
+
+    /**
+     * RS256 (-257); RSASSA-PKCS1-v1_5 using SHA-256
+     *
+     * @since 1.3
+     */
+    public static final int RS256 = -257;
+
+    /**
+     * ES256K (-47); ECDSA using secp256k1 curve and SHA-256
+     *
+     * @since 1.3
+     */
+    public static final int ES256K = -47;
+
+    /**
      * PS512 (-39); RSASSA-PSS w/ SHA-512
      */
     public static final int PS512 = -39;
@@ -121,11 +173,13 @@ public final class COSEAlgorithms
 
 
     private static final int[] values = {
+            RS512, RS384, RS256, ES256K,
             PS512, PS384, PS256, ES512, ES384, EdDSA, ES256,
     };
 
 
     private static final String[] names = {
+            "RS512", "RS384", "RS256", "ES256K",
             "PS512", "PS384", "PS256", "ES512", "ES384", "EdDSA", "ES256",
     };
 

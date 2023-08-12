@@ -16,6 +16,13 @@
 package com.authlete.cose;
 
 
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import com.authlete.cbor.CBORBigInteger;
@@ -29,7 +36,10 @@ import com.authlete.cbor.CBORPairList;
 import com.authlete.cbor.CBORString;
 import com.authlete.cbor.CBORValue;
 import com.authlete.cbor.CBORizer;
+import com.authlete.cose.constants.COSEAlgorithms;
+import com.authlete.cose.constants.COSEEllipticCurves;
 import com.authlete.cose.constants.COSEKeyCommonParameters;
+import com.authlete.cose.constants.COSEKeyOperations;
 import com.authlete.cose.constants.COSEKeyTypes;
 
 
@@ -323,6 +333,298 @@ public class COSEKey extends CBORPairList
     public byte[] getBaseIv()
     {
         return baseIv;
+    }
+
+
+    /**
+     * Get the flag indicating whether this key contains private parameters.
+     *
+     * <p>
+     * Subclasses of the {@link COSEKey} class are expected to override this
+     * method.
+     * </p>
+     *
+     * @return
+     *         {@code true} if this key contains private parameters.
+     *
+     * @since 1.3
+     */
+    public boolean isPrivate()
+    {
+        return false;
+    }
+
+
+    /**
+     * Convert this key to a {@link Map} instance that represents a JWK
+     * (<a href="https://www.rfc-editor.org/rfc/rfc7517.html">RFC 7517
+     * JSON Web Key (JWK)</a>).
+     *
+     * <p>
+     * Subclasses of the {@link COSEKey} class should override the
+     * {@link #addJwkProperties(Map)} method to add JWK properties that
+     * are specific to them.
+     * </p>
+     *
+     * @return
+     *         A {@code Map} instance that represents a JWK.
+     *
+     * @since 1.3
+     *
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc7517.html"
+     *      >RFC 7517 JSON Web Key (JWK)</a>
+     */
+    public Map<String, Object> toJwk()
+    {
+        Map<String, Object> map = new LinkedHashMap<>();
+
+        // kty
+        map.put("kty", toJwkKty(kty));
+
+        // alg
+        if (alg != null)
+        {
+            map.put("alg", toJwkAlg(alg));
+        }
+
+        // kid
+        if (kid != null)
+        {
+            map.put("kid", toJwkKid(kid));
+        }
+
+        // key_ops
+        if (keyOps != null)
+        {
+            map.put("key_ops", toJwkKeyOps(keyOps));
+        }
+
+        // Additional properties.
+        addJwkProperties(map);
+
+        return map;
+    }
+
+
+    /**
+     * Add JWK properties to the given map.
+     *
+     * <p>
+     * This method is called from within the {@link #toJwk()} method.
+     * Subclasses of the {@link COSEKey} class should override this method.
+     * </p>
+     *
+     * @param map
+     *         A map to which JWK properties should be added.
+     *
+     * @since 1.3
+     */
+    protected void addJwkProperties(Map<String, Object> map)
+    {
+        // Subclasses should override this method.
+    }
+
+
+    /**
+     * Convert COSE 'kty' to JWK 'kty'.
+     */
+    private static String toJwkKty(Object kty)
+    {
+        // If the value of the 'kty' parameter is a string.
+        if (kty instanceof String)
+        {
+            // Use the value as is.
+            return (String)kty;
+        }
+
+        // The numeric identifier assigned to the key type.
+        int identifier = ((Number)kty).intValue();
+
+        switch (identifier)
+        {
+            case COSEKeyTypes.OKP:
+                return "OKP";
+
+            case COSEKeyTypes.EC2:
+                return "EC";
+
+            case COSEKeyTypes.RSA:
+                return "RSA";
+
+            default:
+                // Convert the numeric identifier into a string.
+                return ((Number)kty).toString();
+        }
+    }
+
+
+    /**
+     * Convert COSE 'alg' to JWK 'alg'.
+     */
+    private static String toJwkAlg(Object alg)
+    {
+        // If the value of the 'alg' parameter is a string.
+        if (alg instanceof String)
+        {
+            // Use the value as is.
+            return (String)alg;
+        }
+
+        // Get the algorithm name from the numeric identifier.
+        String name = COSEAlgorithms.getNameByValue(((Number)alg).intValue());
+
+        // If a name is assigned to the numeric identifier.
+        if (name != null)
+        {
+            // The algorithm name.
+            return name;
+        }
+
+        // Convert the numeric identifier into a string.
+        return ((Number)alg).toString();
+    }
+
+
+    /**
+     * Convert COSE 'kid' to JWK 'kid'.
+     */
+    private static String toJwkKid(byte[] kid)
+    {
+        try
+        {
+            // Convert the given byte array into a string on the assumption
+            // that the byte array represents a UTF-8 byte sequence.
+            return buildUtf8String(kid);
+        }
+        catch (Exception cause)
+        {
+            // Encode the given byte array by base64url.
+            return encodeByBase64Url(kid);
+        }
+    }
+
+
+    /**
+     * Convert the given byte array into a string on the assumption
+     * that the byte array represents a UTF-8 byte sequence.
+     */
+    private static String buildUtf8String(byte[] bytes) throws CharacterCodingException
+    {
+        ByteBuffer byteBuffer  = ByteBuffer.wrap(bytes);
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+
+        return decoder.decode(byteBuffer).toString();
+    }
+
+
+    /**
+     * Encode the given byte array by base64url.
+     */
+    static String encodeByBase64Url(byte[] bytes)
+    {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+
+    /**
+     * Convert COSE 'key_ops' to JWK 'key_ops'.
+     */
+    private static List<String> toJwkKeyOps(List<Object> keyOps)
+    {
+        List<String> ops = new ArrayList<>();
+
+        for (Object keyOp : keyOps)
+        {
+            // Convert the COSE key operation into a JWK key operation.
+            String op = toJwkKeyOp(keyOp);
+
+            // If the conversion succeeded.
+            if (op != null)
+            {
+                ops.add(op);
+            }
+        }
+
+        return ops;
+    }
+
+
+    /**
+     * Convert a COSE key operation to a JWK key operation.
+     */
+    private static String toJwkKeyOp(Object keyOp)
+    {
+        // If the value of the key operation is a string.
+        if (keyOp instanceof String)
+        {
+            // Use the value as is.
+            return (String)keyOp;
+        }
+
+        // The numeric identifier assigned to the key operation.
+        int identifier = ((Number)keyOp).intValue();
+
+        // cf. RFC 7517 Section 4.3. "key_ops" (Key Operations) Parameter
+
+        switch (identifier)
+        {
+            case COSEKeyOperations.SIGN:
+                return "sign";
+
+            case COSEKeyOperations.VERIFY:
+                return "verify";
+
+            case COSEKeyOperations.ENCRYPT:
+                return "encrypt";
+
+            case COSEKeyOperations.DECRYPT:
+                return "decrypt";
+
+            case COSEKeyOperations.WRAP_KEY:
+                return "wrapKey";
+
+            case COSEKeyOperations.UNWRAP_KEY:
+                return "unwrapKey";
+
+            case COSEKeyOperations.DERIVE_KEY:
+                return "deriveKey";
+
+            case COSEKeyOperations.DERIVE_BITS:
+                return "deriveBits";
+
+            case COSEKeyOperations.MAC_CREATE:
+            case COSEKeyOperations.MAC_VERIFY:
+            default:
+                // Convert the numeric identifier into a string.
+                return ((Number)keyOp).toString();
+        }
+    }
+
+
+    /**
+     * Convert COSE 'crv' to JWK 'crv'.
+     */
+    static String toJwkCrv(Object crv)
+    {
+        // If the value of the 'crv' parameter is a string.
+        if (crv instanceof String)
+        {
+            // Use the value as is.
+            return (String)crv;
+        }
+
+        // Get the curve name from the numeric identifier.
+        String name = COSEEllipticCurves.getNameByValue(((Number)crv).intValue());
+
+        // If a name is assigned to the numeric identifier.
+        if (name != null)
+        {
+            // The curve name.
+            return name;
+        }
+
+        // Convert the numeric identifier into a string.
+        return ((Number)crv).toString();
     }
 
 
