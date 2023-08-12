@@ -1,6 +1,25 @@
 CHANGES
 =======
 
+1.3 (2023-08-12)
+----------------
+
+- `COSEAlgorithms` enum
+  * Add `RS512`, `RS384`, `RS256` and `ES256K`.
+
+- `COSEEC2Key` class
+  * Override the `isPrivate()` method.
+  * Override the `addJwkProperties(Map)` method.
+
+- `COSEKey` class
+  * Add the `isPrivate()` method.
+  * Add the `toJwk()` method.
+  * Add the `addJwkProperties(Map)` method.
+
+- `COSEOKPKey` class
+  * Override the `isPrivate()` method.
+  * Override the `addJwkProperties(Map)` method.
+
 1.2 (2023-08-11)
 ----------------
 
