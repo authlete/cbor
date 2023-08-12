@@ -19,6 +19,7 @@ package com.authlete.cose;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.util.List;
+import java.util.Map;
 import com.authlete.cbor.CBORBoolean;
 import com.authlete.cbor.CBORByteArray;
 import com.authlete.cbor.CBORInteger;
@@ -169,6 +170,59 @@ public class COSEEC2Key extends COSEKey
 
         throw new IllegalArgumentException(
                 "d (-4) must be a byte string.");
+    }
+
+
+    @Override
+    public boolean isPrivate()
+    {
+        return (d != null);
+    }
+
+
+    @Override
+    protected void addJwkProperties(Map<String, Object> map)
+    {
+        // crv
+        if (crv != null)
+        {
+            map.put("crv", toJwkCrv(crv));
+        }
+
+        // x
+        if (x != null)
+        {
+            map.put("x", encodeByBase64Url(x));
+        }
+
+        // y
+        if (y != null)
+        {
+            map.put("y", toJwkY(y));
+        }
+
+        // d
+        if (d != null)
+        {
+            map.put("d", encodeByBase64Url(d));
+        }
+    }
+
+
+    private static Object toJwkY(Object y)
+    {
+        if (y instanceof byte[])
+        {
+            return encodeByBase64Url((byte[])y);
+        }
+
+        // The type of the value of 'y' is boolean.
+
+        // TODO: The boolean value should be uncompressed to a big integer.
+        //
+        // cf. ECDSA.uncompressY(ECParameterSpec paramSpec, BigInteger x, boolean bit)
+
+        return y;
     }
 
 

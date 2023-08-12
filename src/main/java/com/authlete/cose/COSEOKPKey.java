@@ -17,6 +17,7 @@ package com.authlete.cose;
 
 
 import java.util.List;
+import java.util.Map;
 import com.authlete.cbor.CBORByteArray;
 import com.authlete.cbor.CBORItem;
 import com.authlete.cbor.CBORPair;
@@ -147,6 +148,36 @@ public class COSEOKPKey extends COSEKey
 
         throw new IllegalArgumentException(
                 "d (-4) must be a byte string.");
+    }
+
+
+    @Override
+    public boolean isPrivate()
+    {
+        return (d != null);
+    }
+
+
+    @Override
+    protected void addJwkProperties(Map<String, Object> map)
+    {
+        // crv
+        if (crv != null)
+        {
+            map.put("crv", toJwkCrv(crv));
+        }
+
+        // x
+        if (x != null)
+        {
+            map.put("x", encodeByBase64Url(x));
+        }
+
+        // d
+        if (d != null)
+        {
+            map.put("d", encodeByBase64Url(d));
+        }
     }
 
 

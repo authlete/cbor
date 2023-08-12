@@ -24,12 +24,25 @@ import static org.junit.Assert.fail;
 import java.nio.charset.StandardCharsets;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.text.ParseException;
+import java.util.Base64;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Test;
 import com.authlete.cbor.CBORItem;
 import com.authlete.cose.constants.COSEAlgorithms;
+import com.authlete.cose.constants.COSEEllipticCurves;
+import com.authlete.cose.constants.COSEKeyOperations;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.KeyOperation;
+import com.nimbusds.jose.jwk.KeyType;
+import com.nimbusds.jose.util.Base64URL;
 
 
 public class COSESigningTest
@@ -53,7 +66,28 @@ public class COSESigningTest
     }
 
 
+    private static String toBase64Url(byte[] bytes)
+    {
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+
     private static ECPrivateKey createECPrivateKey_11()
+    {
+        try
+        {
+            return createPrivateCOSEEC2Key_11().toECPrivateKey();
+        }
+        catch (Exception cause)
+        {
+            // This should not happen.
+            cause.printStackTrace();
+            return null;
+        }
+    }
+
+
+    private static COSEEC2Key createPrivateCOSEEC2Key_11()
     {
         // RFC 9052, C.7.2. Private Keys
         //
@@ -66,18 +100,23 @@ public class COSESigningTest
         //   -4:h'57c92077664146e876760c9520d054aa93c3afb04e306705db6090308507b4d3'
         // }
 
+        return new COSEKeyBuilder()
+                .ktyEC2()
+                .kid("11")
+                .ec2CrvP256()
+                .ec2X(fromHex("bac5b11cad8f99f9c72b05cf4b9e26d244dc189f745228255a219a86d6a09eff"))
+                .ec2Y(fromHex("20138bf82dc1b6d562be0fa54ab7804a3a64b6d72ccfed6b6fb6ed28bbfc117e"))
+                .ec2D(fromHex("57c92077664146e876760c9520d054aa93c3afb04e306705db6090308507b4d3"))
+                .buildEC2Key()
+                ;
+    }
+
+
+    private static ECPublicKey createECPublicKey_11()
+    {
         try
         {
-            return new COSEKeyBuilder()
-                    .ktyEC2()
-                    .kid("11")
-                    .ec2CrvP256()
-                    .ec2X(fromHex("bac5b11cad8f99f9c72b05cf4b9e26d244dc189f745228255a219a86d6a09eff"))
-                    .ec2Y(fromHex("20138bf82dc1b6d562be0fa54ab7804a3a64b6d72ccfed6b6fb6ed28bbfc117e"))
-                    .ec2D(fromHex("57c92077664146e876760c9520d054aa93c3afb04e306705db6090308507b4d3"))
-                    .buildEC2Key()
-                    .toECPrivateKey()
-                    ;
+            return createPublicCOSEEC2Key_11().toECPublicKey();
         }
         catch (Exception cause)
         {
@@ -88,7 +127,7 @@ public class COSESigningTest
     }
 
 
-    private static ECPublicKey createECPublicKey_11()
+    private static COSEEC2Key createPublicCOSEEC2Key_11()
     {
         // RFC 9052, C.7.1. Public Keys
         //
@@ -100,22 +139,28 @@ public class COSESigningTest
         //     2:'11'
         // }
 
+        return new COSEKeyBuilder()
+                .ec2CrvP256()
+                .ec2X(fromHex("bac5b11cad8f99f9c72b05cf4b9e26d244dc189f745228255a219a86d6a09eff"))
+                .ec2Y(fromHex("20138bf82dc1b6d562be0fa54ab7804a3a64b6d72ccfed6b6fb6ed28bbfc117e"))
+                .ktyEC2()
+                .kid("11")
+                .buildEC2Key()
+                ;
+    }
+
+
+    private static JWK toJwk(Map<String, Object> map)
+    {
         try
         {
-            return new COSEKeyBuilder()
-                    .ec2CrvP256()
-                    .ec2X(fromHex("bac5b11cad8f99f9c72b05cf4b9e26d244dc189f745228255a219a86d6a09eff"))
-                    .ec2Y(fromHex("20138bf82dc1b6d562be0fa54ab7804a3a64b6d72ccfed6b6fb6ed28bbfc117e"))
-                    .ktyEC2()
-                    .kid("11")
-                    .buildEC2Key()
-                    .toECPublicKey()
-                    ;
+            return JWK.parse(map);
         }
-        catch (Exception cause)
+        catch (ParseException e)
         {
-            // This should not happen.
-            cause.printStackTrace();
+            e.printStackTrace();
+            fail(e.getMessage());
+
             return null;
         }
     }
@@ -314,5 +359,108 @@ public class COSESigningTest
         boolean valid = verifier.verify(sign1);
 
         assertTrue("Signature verification failed.", valid);
+    }
+
+
+    @Test
+    public void test_ec2_private_jwk()
+    {
+        // Create a COSE key that represents an EC private key.
+        COSEEC2Key coseKey = createPrivateCOSEEC2Key_11();
+
+        assertEquals(true, coseKey.isPrivate());
+
+        // Convert the COSE key into a Map that represents a JWK.
+        Map<String, Object> map = coseKey.toJwk();
+
+        String expectedKty = "EC";
+        String expectedKid = "11";
+        String expectedCrv = "P-256";
+        byte[] d           = fromHex("57c92077664146e876760c9520d054aa93c3afb04e306705db6090308507b4d3");
+        String expectedD   = toBase64Url(d);
+
+        assertEquals(expectedKty, map.get("kty"));
+        assertEquals(expectedKid, map.get("kid"));
+        assertEquals(expectedCrv, map.get("crv"));
+        assertEquals(expectedD,   map.get("d"));
+
+        // Convert the map to a JWK.
+        JWK jwk = toJwk(map);
+
+        assertEquals(true, jwk.isPrivate());
+
+        ECKey ecKey = jwk.toECKey();
+
+        assertEquals(KeyType.EC,          ecKey.getKeyType());
+        assertEquals(Curve.P_256,         ecKey.getCurve());
+        assertEquals(Base64URL.encode(d), ecKey.getD());
+    }
+
+
+    @Test
+    public void test_ec2_public_jwk()
+    {
+        // Create a COSE key that represents an EC public key.
+        COSEEC2Key coseKey = createPublicCOSEEC2Key_11();
+
+        assertEquals(false, coseKey.isPrivate());
+
+        // Convert the COSE key into a Map that represents a JWK.
+        Map<String, Object> map = coseKey.toJwk();
+
+        String expectedKty = "EC";
+        String expectedKid = "11";
+        String expectedCrv = "P-256";
+        byte[] x           = fromHex("bac5b11cad8f99f9c72b05cf4b9e26d244dc189f745228255a219a86d6a09eff");
+        byte[] y           = fromHex("20138bf82dc1b6d562be0fa54ab7804a3a64b6d72ccfed6b6fb6ed28bbfc117e");
+        String expectedX   = toBase64Url(x);
+        String expectedY   = toBase64Url(y);
+
+        assertEquals(expectedKty, map.get("kty"));
+        assertEquals(expectedKid, map.get("kid"));
+        assertEquals(expectedCrv, map.get("crv"));
+        assertEquals(expectedX,   map.get("x"));
+        assertEquals(expectedY,   map.get("y"));
+
+        // Convert the map to a JWK.
+        JWK jwk = toJwk(map);
+
+        assertEquals(false, jwk.isPrivate());
+
+        ECKey ecKey = jwk.toECKey();
+
+        assertEquals(KeyType.EC,          ecKey.getKeyType());
+        assertEquals(Curve.P_256,         ecKey.getCurve());
+        assertEquals(Base64URL.encode(x), ecKey.getX());
+        assertEquals(Base64URL.encode(y), ecKey.getY());
+    }
+
+
+    @Test
+    public void test_cose_key_jwk() throws COSEException
+    {
+        COSEKey coseKey = new COSEKeyBuilder()
+                .ktyEC2()
+                .alg(COSEAlgorithms.ES256)
+                .keyOps(List.of(COSEKeyOperations.VERIFY))
+                .ec2Crv(COSEEllipticCurves.P_256)
+                .ec2X(fromHex("bac5b11cad8f99f9c72b05cf4b9e26d244dc189f745228255a219a86d6a09eff"))
+                .ec2Y(fromHex("20138bf82dc1b6d562be0fa54ab7804a3a64b6d72ccfed6b6fb6ed28bbfc117e"))
+                .build();
+
+        // Convert the COSE key into a Map that represents a JWK.
+        Map<String, Object> map = coseKey.toJwk();
+
+        String       expectedAlg    = "ES256";
+        List<String> expectedKeyOps = List.of("verify");
+
+        assertEquals(expectedAlg,    map.get("alg"));
+        assertEquals(expectedKeyOps, map.get("key_ops"));
+
+        // Convert the map to a JWK.
+        JWK jwk = toJwk(map);
+
+        assertEquals(JWSAlgorithm.ES256,          jwk.getAlgorithm());
+        assertEquals(Set.of(KeyOperation.VERIFY), jwk.getKeyOperations());
     }
 }
