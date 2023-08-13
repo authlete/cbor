@@ -77,7 +77,8 @@ public class COSESign extends COSEMessage
             CBORItem payload,
             CBORItemList signatures)
     {
-        super(98, protectedHeader, unprotectedHeader, payload, signatures);
+        super(COSEMessageType.COSE_SIGN,
+                protectedHeader, unprotectedHeader, payload, signatures);
 
         validateSignatures(signatures);
     }

@@ -75,7 +75,8 @@ public class COSEEncrypt extends COSEMessage
             CBORItem ciphertext,
             CBORItemList recipients)
     {
-        super(96, protectedHeader, unprotectedHeader, ciphertext, recipients);
+        super(COSEMessageType.COSE_ENCRYPT,
+                protectedHeader, unprotectedHeader, ciphertext, recipients);
 
         validateRecipients(recipients);
     }

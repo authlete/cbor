@@ -66,7 +66,8 @@ public class COSEEncrypt0 extends COSEMessage
             COSEUnprotectedHeader unprotectedHeader,
             CBORItem ciphertext)
     {
-        super(16, protectedHeader, unprotectedHeader, ciphertext);
+        super(COSEMessageType.COSE_ENCRYPT0,
+                protectedHeader, unprotectedHeader, ciphertext);
     }
 
 

@@ -80,7 +80,8 @@ public class COSEMac extends COSEMessage
             CBORByteArray tag,
             CBORItemList recipients)
     {
-        super(97, protectedHeader, unprotectedHeader, payload, tag, recipients);
+        super(COSEMessageType.COSE_MAC,
+                protectedHeader, unprotectedHeader, payload, tag, recipients);
 
         validateTag(tag);
         validateRecipients(recipients);

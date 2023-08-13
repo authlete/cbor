@@ -39,15 +39,14 @@ import com.authlete.cbor.CBORTaggedItem;
  */
 public abstract class COSEMessage extends COSEObject
 {
-    private final int tagNumber;
+    private final COSEMessageType type;
 
 
     /**
      * A constructor.
      *
-     * @param tagNumber
-     *         The tag number assigned to the COSE message that the subclass
-     *         represents.
+     * @param type
+     *         The type of this COSE message.
      *
      * @param protectedHeader
      *         The protected header. Must not be null.
@@ -63,12 +62,13 @@ public abstract class COSEMessage extends COSEObject
      *         Additional items.
      *
      * @throws IllegalArgumentException
+     *         {@code type} is null,
      *         {@code protectedHeader} is null, {@code unprotectedHeader} is
      *         null, or {@code content} is neither a {@link CBORByteArray}
      *         instance nor a {@link CBORNull} instance.
      */
     public COSEMessage(
-            int tagNumber,
+            COSEMessageType type,
             COSEProtectedHeader protectedHeader,
             COSEUnprotectedHeader unprotectedHeader,
             CBORItem content,
@@ -76,7 +76,26 @@ public abstract class COSEMessage extends COSEObject
     {
         super(protectedHeader, unprotectedHeader, content, additionalItems);
 
-        this.tagNumber = tagNumber;
+        if (type == null)
+        {
+            throw new IllegalArgumentException("The COSE message type is missing.");
+        }
+
+        this.type = type;
+    }
+
+
+    /**
+     * Get the type of this COSE message.
+     *
+     * @return
+     *         The type of this COSE message.
+     *
+     * @since 1.4
+     */
+    public COSEMessageType getType()
+    {
+        return type;
     }
 
 
@@ -139,7 +158,7 @@ public abstract class COSEMessage extends COSEObject
      */
     public int getTagNumber()
     {
-        return tagNumber;
+        return getType().getTagNumber();
     }
 
 

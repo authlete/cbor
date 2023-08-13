@@ -73,7 +73,8 @@ public class COSESign1 extends COSEMessage
             CBORItem payload,
             CBORByteArray signature)
     {
-        super(18, protectedHeader, unprotectedHeader, payload, signature);
+        super(COSEMessageType.COSE_SIGN1,
+                protectedHeader, unprotectedHeader, payload, signature);
 
         validateSignature(signature);
     }
