@@ -71,7 +71,8 @@ public class COSEMac0 extends COSEMessage
             CBORItem payload,
             CBORByteArray tag)
     {
-        super(17, protectedHeader, unprotectedHeader, payload, tag);
+        super(COSEMessageType.COSE_MAC0,
+                protectedHeader, unprotectedHeader, payload, tag);
 
         validateTag(tag);
     }
