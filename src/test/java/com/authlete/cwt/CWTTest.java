@@ -104,7 +104,7 @@ public class CWTTest
      * Decode the byte array as a CBOR item sequence and returns the first
      * CBOR item.
      */
-    private static CBORItem decode(byte[] bytes)
+    private static CBORItem decodeAsCborItem(byte[] bytes)
     {
         try
         {
@@ -142,7 +142,7 @@ public class CWTTest
     public void test_read_cwt()
     {
         // Parse the byte array representing the CWT example as a CBOR item.
-        CBORItem item = decode(fromHex(CWT_EXAMPLE_HEX_STRING));
+        CBORItem item = decodeAsCborItem(fromHex(CWT_EXAMPLE_HEX_STRING));
 
         // Because the CWT CBOR Tag is prepended, the decoder should return
         // an instance of the CWT class.
@@ -207,7 +207,7 @@ public class CWTTest
         // Encoded CBOR map
         byte[] encodedClaims = claims.encode();
 
-        // Embed the CBOR map int a byte string.
+        // Embed the CBOR map into a byte string.
         CBORByteArray payload = new CBORByteArray(encodedClaims);
 
         // Parse the payload.
