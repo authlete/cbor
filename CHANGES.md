@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+1.4 (2023-08-14)
+----------------
+
+- `COSEMessage` class
+  * Change the type of the first argument of the constructor from `int` to `COSEMessageType`.
+  * Add the `getType()` method.
+
+- New Types
+  * `COSEMessageType` enum
+  * `CWTClaims` class
+  * `CWTClaimsSet` class
+  * `CWTClaimsSetBuilder` class
+
 1.3 (2023-08-12)
 ----------------
 

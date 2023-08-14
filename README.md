@@ -20,6 +20,7 @@ be added as the need arises.
   - [ ] MAC
 - [x] CWT
   - [x] Tag Processor
+  - [x] CWT Claims Set
   - [ ] ?
 
 ## License
@@ -659,6 +660,7 @@ Below shows the inheritance tree of CBOR data item including the classes.
       - `COSEEC2Key`
       - `COSEOKPKey`
     - `COSEUnprotectedHeader`
+    - `CWTClaimsSet`
   - `CBORTaggedItem` (CBOR tag)
     - `CWT` (CWT)
   - `CBORUndefined` (CBOR undefined)
@@ -1114,6 +1116,168 @@ public boolean verify(COSESign1 sign1, byte[] externalData) throws COSEException
     // Verify the signature.
     return verify(key, alg, toBeSigned.encode(), sign1.getSignature().getValue());
 }
+```
+
+### CWT Reading
+
+When a CWT CBOR tag (61) is prepended to a COSE message, the CBOR decoder
+returns a `CWT` instance.
+
+```java
+// Signed CWT Example, copied from RFC 8392.
+//
+// / CWT CBOR tag / 61(
+//   / COSE_Sign1 CBOR tag / 18(
+//     [
+//       / protected / << {
+//         / alg / 1: -7 / ECDSA 256 /
+//       } >>,
+//       / unprotected / {
+//         / kid / 4: h'4173796d6d657472696345434453413
+//                      23536' / 'AsymmetricECDSA256' /
+//       },
+//       / payload / << {
+//         / iss / 1: "coap://as.example.com",
+//         / sub / 2: "erikw",
+//         / aud / 3: "coap://light.example.com",
+//         / exp / 4: 1444064944,
+//         / nbf / 5: 1443944944,
+//         / iat / 6: 1443944944,
+//         / cti / 7: h'0b71'
+//       } >>,
+//       / signature / h'5427c1ff28d23fbad1f29c4c7c6a555e601d6fa29f
+//                       9179bc3d7438bacaca5acd08c8d4d4f96131680c42
+//                       9a01f85951ecee743a52b9b63632c57209120e1c9e
+//                       30'
+//     ]
+//   )
+// )
+byte[] encodedCWT = HexFormat.of().parseHex(
+        // CWT CBOR Tag
+        "d83d" +
+        // COSE_Sign1 CBOR Tag + COSE_Sign1 (RFC 8392 A.3. Example Signed CWT)
+        "d28443a10126a104524173796d6d657472696345434453413235365850a701756" +
+        "36f61703a2f2f61732e6578616d706c652e636f6d02656572696b77037818636f" +
+        "61703a2f2f6c696768742e6578616d706c652e636f6d041a5612aeb0051a5610d" +
+        "9f0061a5610d9f007420b7158405427c1ff28d23fbad1f29c4c7c6a555e601d6f" +
+        "a29f9179bc3d7438bacaca5acd08c8d4d4f96131680c429a01f85951ecee743a5" +
+        "2b9b63632c57209120e1c9e30");
+
+// Decode the byte array as a CBOR item. As the input data has a CWT CBOR tag,
+// the decoder returns an instance of the CWT class.
+CWT cwt = (CWT)new CBORDecoder(encodedCWT).next();
+```
+
+The `CWT` class provides the `getMessage()` method that returns the COSE
+message of the CWT as a `COSEMessage` instance.
+
+```java
+// The COSE message of the CWT.
+COSEMessage message = cwt.getMessage();
+```
+
+The type of the COSE message can be checked by the `getType()` method of the
+`COSEMessage` instance. As the example above contains a COSE_Sign1 message,
+the `getType()` method returns `COSEMessageType.COSE_SIGN1` and the
+`COSEMessage` instance can be cast to the `COSESign1` class.
+
+```java
+// The type of the COSE message in the example is COSE_Sign1.
+assertEquals(COSEMessageType.COSE_SIGN1, message.getType());
+
+// The COSEMessage instance can be cast to the COSESign1 class.
+COSESign1 sign1 = (COSESign1)message;
+```
+
+[RFC 8392][RFC_8392] defines "CWT Claims Set" as _"The CBOR map that contains
+the claims conveyed by the CWT."_
+
+The `CWTClaimsSet` class in this library represents the CWT Claims Set. The
+class provides the `build(CBORItem payload)` method to build a `CWTClaimsSet`
+instance from the payload of a COSE message.
+
+```java
+// The payload of the COSE_Sign1 message. The type of the returned object is
+// either CBORByteArray (CBOR byte string) or CBORNull (CBOR null).
+CBORItem payload = sign1.getPayload();
+
+// Interpret the payload as CWT Claims Set.
+CWTClaimsSet claims = CWTClaimsSet.build(payload);
+```
+
+The `CWTClaimsSet` class provides methods for some known claims. For example,
+the `getIss()` method returns the value of the "iss" claim (whose claim key
+is 1) as a string.
+
+```java
+// Expected claim values
+String expectedIss = "coap://as.example.com";
+String expectedSub = "erikw";
+String expectedAud = "coap://light.example.com";
+Date   expectedExp = new Date(1444064944 * 1000L);
+Date   expectedNbf = new Date(1443944944 * 1000L);
+Date   expectedIat = new Date(1443944944 * 1000L);
+byte[] expectedCti = { (byte)0x0b, (byte)0x71 };
+
+// Test if actual claim values are equal to the expected ones.
+assertEquals(expectedIss, claims.getIss());
+assertEquals(expectedSub, claims.getSub());
+assertEquals(expectedAud, claims.getAud());
+assertEquals(expectedExp, claims.getExp());
+assertEquals(expectedNbf, claims.getNbf());
+assertEquals(expectedIat, claims.getIat());
+assertArrayEquals(expectedCti, claims.getCti());
+```
+
+### CWT Claims Set Builder
+
+The `CWTClaimsSetBuilder` class is provided as a utility to create an
+instance of the `CWTClaimsSet` class.
+
+```java
+// Claim values.
+String iss   = "ISS";
+String sub   = "SUB";
+String aud   = "AUD";
+Date   iat   = new Date(1000000L);
+Date   nbf   = new Date(2000000L);
+Date   exp   = new Date(3000000L);
+String cti   = "CTI";
+String nonce = "NONCE";
+
+// Build a new CWTClaimsSet instance with the claim values.
+CWTClaimsSet claims = new CWTClaimsSetBuilder()
+        .iss(iss)
+        .sub(sub)
+        .aud(aud)
+        .iat(iat)
+        .nbf(nbf)
+        .exp(exp)
+        .cti(cti)
+        .nonce(nonce)
+        .build();
+```
+
+The `CWTClaimsSet` class is a subclass of the `CBORPairList`. In other words,
+the `CWTClaimsSet` class is a kind of CBOR map. Therefore, a `CWTClaimsSet`
+instance can be used as the payload of a CWT by embedding the CBOR-encoding
+representation of the `CWTClaimsSet` instance into a CBOR byte string.
+
+```java
+// The CBOR-encoding representation of CWT Claims Set.
+byte[] encodedClaims = claims.encode();
+
+// Embed the encoded claims into a byte string.
+CBORByteArray payload = new CBORByteArray(encodedClaims);
+
+// Create a COSE message with the payload.
+COSESign1 message = new COSESign1Builder()
+        .payload(payload)
+        // abbreviated
+        .build();
+
+// The COSE message can be wrapped by the CWT class as necessary.
+CWT cwt = new CWT(message);
 ```
 
 ## Contact
