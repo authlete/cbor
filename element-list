@@ -5,3 +5,4 @@ com.authlete.cose
 com.authlete.cose.constants
 com.authlete.cwt
 com.authlete.cwt.constants
+com.authlete.mdoc
