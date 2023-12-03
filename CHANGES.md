@@ -1,6 +1,9 @@
 CHANGES
 =======
 
+1.5 (2023-12-03)
+----------------
+
 - `CBORByteArray` class
   * Add the `CBORByteArray(byte[], CBORItem)` constructor.
   * Add the `CBORByteArray(byte[], List<? extends CBORItem>)` constructor.
