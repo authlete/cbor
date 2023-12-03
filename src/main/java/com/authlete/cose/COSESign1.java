@@ -150,7 +150,7 @@ public class COSESign1 extends COSEMessage
             return new COSESign1(
                     (COSEProtectedHeader)common.get(0),
                     (COSEUnprotectedHeader)common.get(1),
-                    buildDecodableByteArrayIfPossible(common.get(2)),
+                    common.get(2),
                     (CBORByteArray)signature);
         }
         catch (Exception cause)

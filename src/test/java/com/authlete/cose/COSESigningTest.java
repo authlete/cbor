@@ -213,7 +213,7 @@ public class COSESigningTest
         assertEquals(0, sign.getUnprotectedHeader().getParameters().size());
 
         // The number of COSE signatures should be 1.
-        List<CBORItem> coseSignatures = sign.getSignatures().getItems();
+        List<? extends CBORItem> coseSignatures = sign.getSignatures().getItems();
         assertEquals(1, coseSignatures.size());
 
         // The first COSE signature in the COSESign instance.

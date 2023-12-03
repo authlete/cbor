@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  */
 public class CBORPairList extends CBORItem
 {
-    private final List<CBORPair> pairs;
+    private final List<? extends CBORPair> pairs;
 
 
     /**
@@ -41,7 +41,7 @@ public class CBORPairList extends CBORItem
      * @param pairs
      *         A list of key-value pairs.
      */
-    public CBORPairList(List<CBORPair> pairs)
+    public CBORPairList(List<? extends CBORPair> pairs)
     {
         this.pairs = pairs;
     }
@@ -53,7 +53,7 @@ public class CBORPairList extends CBORItem
      * @return
      *         The key-value pairs.
      */
-    public List<CBORPair> getPairs()
+    public List<? extends CBORPair> getPairs()
     {
         return pairs;
     }
@@ -78,6 +78,31 @@ public class CBORPairList extends CBORItem
 
         return pairs.stream().map(CBORPair::toString)
                 .collect(Collectors.joining(", ", "{", "}"));
+    }
+
+
+    @Override
+    protected String prettify(String indent, String indentUnit)
+    {
+        // The comment attached to this CBOR item.
+        String comment = (getComment() == null) ? ""
+                : String.format("/ %s / ", getComment());
+
+        if (pairs == null || pairs.size() == 0)
+        {
+            return String.format("%s{%n%s}", comment, indent);
+        }
+
+        String delimiter = String.format(",%n");
+        String prefix    = String.format("%s{%n", comment);
+        String suffix    = String.format("%n%s}", indent);
+
+        // The indent for each pair.
+        final String subIndent = indent + indentUnit;
+
+        return pairs.stream()
+                .map(pair -> String.format("%s%s", subIndent, pair.prettify(subIndent, indentUnit)))
+                .collect(Collectors.joining(delimiter, prefix, suffix));
     }
 
 
@@ -117,5 +142,46 @@ public class CBORPairList extends CBORItem
         }
 
         return map;
+    }
+
+
+    /**
+     * Find a pair that has the specified key.
+     *
+     * @param key
+     *         A pair that has the specified key.
+     *
+     * @return
+     *         A pair that has the specified key.
+     *         {@code null} if not found.
+     *
+     * @since 1.5
+     */
+    public CBORPair findByKey(Object key)
+    {
+        if (key == null)
+        {
+            return null;
+        }
+
+        if (pairs == null)
+        {
+            return null;
+        }
+
+        for (CBORPair pair : pairs)
+        {
+            if (!(pair.getKey() instanceof CBORValue))
+            {
+                continue;
+            }
+
+            if (key.equals(((CBORValue<?>)pair.getKey()).getValue()))
+            {
+                return pair;
+            }
+        }
+
+        return null;
     }
 }

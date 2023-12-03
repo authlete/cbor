@@ -8,7 +8,7 @@
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>
-        A Java library for CBOR, COSE and CWT.
+        A Java library for CBOR, COSE, CWT and mdoc.
     </description>
     <url>https://github.com/authlete/cbor</url>
 

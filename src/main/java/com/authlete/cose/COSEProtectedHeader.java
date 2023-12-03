@@ -47,7 +47,7 @@ import com.authlete.cbor.CBORizer;
  */
 public class COSEProtectedHeader extends CBORByteArray
 {
-    private final List<CBORPair> pairs;
+    private final List<? extends CBORPair> pairs;
     private Object alg;
     private List<Object> crit;
     private Object contentType;
@@ -95,17 +95,19 @@ public class COSEProtectedHeader extends CBORByteArray
      *         "https://www.rfc-editor.org/rfc/rfc9052.html#section-3.1">3.1.
      *         Common COSE Header Parameters</a>.
      */
-    public COSEProtectedHeader(byte[] value, List<CBORPair> pairs) throws IllegalArgumentException
+    public COSEProtectedHeader(byte[] value, List<? extends CBORPair> pairs) throws IllegalArgumentException
     {
-        super(value, true);
+        super(value, new CBORPairList(pairs));
 
         validateParameters(pairs);
 
         this.pairs = pairs;
+
+        setComment("protected");
     }
 
 
-    private void validateParameters(List<CBORPair> pairs)
+    private void validateParameters(List<? extends CBORPair> pairs)
     {
         // Validate the label-value pairs.
         Map<Object, Object> map = HeaderValidator.validate(
@@ -181,7 +183,7 @@ public class COSEProtectedHeader extends CBORByteArray
      * @return
      *         The set of parameters of this header.
      */
-    public List<CBORPair> getPairs()
+    public List<? extends CBORPair> getPairs()
     {
         return pairs;
     }
@@ -372,7 +374,7 @@ public class COSEProtectedHeader extends CBORByteArray
         }
 
         // Key-value pairs in the CBOR map.
-        List<CBORPair> pairs = ((CBORPairList)item).getPairs();
+        List<? extends CBORPair> pairs = ((CBORPairList)item).getPairs();
 
         if (pairs.size() == 0)
         {
@@ -427,8 +429,13 @@ public class COSEProtectedHeader extends CBORByteArray
             map = Map.of();
         }
 
+        // Convert the Java map into a CBOR map.
         CBORPairList pairList = (CBORPairList)new CBORizer().cborizeMap(map);
-        byte[]       value    = pairList.encode();
+
+        // Add comments to the header parameters.
+        COSEHeaderBuilder.addHeaderComments(pairList);
+
+        byte[] value = pairList.encode();
 
         return new COSEProtectedHeader(value, pairList.getPairs());
     }

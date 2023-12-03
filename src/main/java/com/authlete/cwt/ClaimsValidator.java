@@ -43,7 +43,7 @@ import com.authlete.cwt.constants.CWTClaims;
  */
 class ClaimsValidator
 {
-    static Map<Object, Object> validate(List<CBORPair> pairs)
+    static Map<Object, Object> validate(List<? extends CBORPair> pairs)
     {
         Map<Object, Object> claims = new LinkedHashMap<>();
 

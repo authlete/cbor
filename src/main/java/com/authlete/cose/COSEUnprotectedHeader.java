@@ -63,15 +63,17 @@ public class COSEUnprotectedHeader extends CBORPairList
      *         "https://www.rfc-editor.org/rfc/rfc9052.html#section-3.1">3.1.
      *         Common COSE Header Parameters</a>.
      */
-    public COSEUnprotectedHeader(List<CBORPair> pairs) throws IllegalArgumentException
+    public COSEUnprotectedHeader(List<? extends CBORPair> pairs) throws IllegalArgumentException
     {
         super(pairs);
 
         validateParameters(pairs);
+
+        setComment("unprotected");
     }
 
 
-    private void validateParameters(List<CBORPair> pairs)
+    private void validateParameters(List<? extends CBORPair> pairs)
     {
         // Validate the label-value pairs.
         Map<Object, Object> map = HeaderValidator.validate(pairs, true /* unprotected */);
@@ -261,7 +263,7 @@ public class COSEUnprotectedHeader extends CBORPairList
         }
 
         // The key-value pairs in the header.
-        List<CBORPair> pairs = ((CBORPairList)header).getPairs();
+        List<? extends CBORPair> pairs = ((CBORPairList)header).getPairs();
 
         try
         {
@@ -292,7 +294,11 @@ public class COSEUnprotectedHeader extends CBORPairList
             map = Map.of();
         }
 
+        // Convert the Java map into a CBOR map.
         CBORPairList pairList = (CBORPairList)new CBORizer().cborizeMap(map);
+
+        // Add comments to the header parameters.
+        COSEHeaderBuilder.addHeaderComments(pairList);
 
         return new COSEUnprotectedHeader(pairList.getPairs());
     }

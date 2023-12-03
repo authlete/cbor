@@ -70,7 +70,7 @@ public class CWTClaimsSet extends CBORPairList
      *         "https://www.rfc-editor.org/rfc/rfc8392.html#section-3"
      *         >RFC 8392 Section 3. Claims</a>.
      */
-    public CWTClaimsSet(List<CBORPair> pairs) throws IllegalArgumentException
+    public CWTClaimsSet(List<? extends CBORPair> pairs) throws IllegalArgumentException
     {
         super(pairs);
 
@@ -78,7 +78,7 @@ public class CWTClaimsSet extends CBORPairList
     }
 
 
-    private void validateClaims(List<CBORPair> pairs)
+    private void validateClaims(List<? extends CBORPair> pairs)
     {
         // Validate the label-value pairs.
         Map<Object, Object> map = ClaimsValidator.validate(pairs);
@@ -403,7 +403,7 @@ public class CWTClaimsSet extends CBORPairList
      */
     public static CWTClaimsSet build(CBORItem payload) throws CBORDecoderException
     {
-        List<CBORPair> pairs;
+        List<? extends CBORPair> pairs;
 
         if (payload instanceof CWTClaimsSet)
         {
@@ -445,7 +445,7 @@ public class CWTClaimsSet extends CBORPairList
     }
 
 
-    private static List<CBORPair> extractPairs(CBORByteArray payload) throws CBORDecoderException
+    private static List<? extends CBORPair> extractPairs(CBORByteArray payload) throws CBORDecoderException
     {
         try
         {

@@ -92,7 +92,7 @@ public class COSESign extends COSEMessage
                     "A signature list given to COSESign's constructor must not be null.");
         }
 
-        List<CBORItem> items = signatures.getItems();
+        List<? extends CBORItem> items = signatures.getItems();
 
         if (items == null || items.size() == 0)
         {
@@ -177,7 +177,7 @@ public class COSESign extends COSEMessage
             return new COSESign(
                     (COSEProtectedHeader)common.get(0),
                     (COSEUnprotectedHeader)common.get(1),
-                    buildDecodableByteArrayIfPossible(common.get(2)),
+                    common.get(2),
                     signatures);
         }
         catch (Exception cause)
@@ -189,7 +189,7 @@ public class COSESign extends COSEMessage
 
     private static CBORItemList buildSignatures(CBORItemList list) throws COSEException
     {
-        List<CBORItem> items = list.getItems();
+        List<? extends CBORItem> items = list.getItems();
 
         if (items == null || items.size() == 0)
         {

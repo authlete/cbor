@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.util.Base64;
 
 
 /**
@@ -28,6 +29,48 @@ import java.math.BigInteger;
  */
 public abstract class CBORItem
 {
+    /**
+     * The comment attached to this CBOR item.
+     */
+    private String mComment;
+
+
+    /**
+     * Get the comment attached to this CBOR item.
+     *
+     * <p>
+     * The attached comment may be used by the {@link #prettify()} method.
+     * </p>
+     *
+     * @return
+     *         The comment attached to this CBOR item.
+     *
+     * @since 1.5
+     */
+    public String getComment()
+    {
+        return mComment;
+    }
+
+
+    /**
+     * Attach a comment to this CBOR item.
+     *
+     * <p>
+     * The attached comment may be used by the {@link #prettify()} method.
+     * </p>
+     *
+     * @param comment
+     *         A comment to attach.
+     *
+     * @since 1.5
+     */
+    public void setComment(String comment)
+    {
+        mComment = comment;
+    }
+
+
     /**
      * Convert this {@link CBORItem} instance into an instance of a common Java class.
      *
@@ -71,6 +114,114 @@ public abstract class CBORItem
         }
 
         return baos.toByteArray();
+    }
+
+
+    /**
+     * Get the CBOR representation of this instance in the base64 format.
+     *
+     * @return
+     *         The CBOR representation of this instance in the base64 format.
+     *
+     * @since 1.5
+     */
+    public String encodeToBase64()
+    {
+        return Base64.getEncoder().encodeToString(encode());
+    }
+
+
+    /**
+     * Get the CBOR representation of this instance in the base64url format.
+     *
+     * @return
+     *         The CBOR representation of this instance in the base64url format.
+     *
+     * @since 1.5
+     */
+    public String encodeToBase64Url()
+    {
+        return Base64.getUrlEncoder().encodeToString(encode());
+    }
+
+
+    /**
+     * Get the CBOR representation of this instance in the hexadecimal format.
+     *
+     * @return
+     *         The CBOR representation of this instance in the hexadecimal format.
+     *
+     * @since 1.5
+     */
+    public String encodeToHex()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        for (byte b : encode())
+        {
+            sb.append(toHex(b));
+        }
+
+        return sb.toString();
+    }
+
+
+    private static String toHex(int b)
+    {
+        return String.format("%02x", (0xFF & b));
+    }
+
+
+    /**
+     * Stringify this CBOR item and all the nested CBOR items in the pretty
+     * format.
+     *
+     * @return
+     *         The string expression of this CBOR item and all the nested
+     *         CBOR items.
+     *
+     * @since 1.5
+     */
+    public String prettify()
+    {
+        return prettify("", "  ");
+    }
+
+
+    /**
+     * Stringify this CBOR item and all the nested CBOR items in the pretty
+     * format.
+     *
+     * <p>
+     * Subclasses should override this method as necessary.
+     * </p>
+     *
+     * @param indent
+     *         The indent inherited from the upper CBOR item.
+     *
+     * @param indentUnit
+     *         Additional indent that should be added when nested CBOR items
+     *         are stringified.
+     *
+     * @return
+     *         The string expression of this CBOR item and all the nested
+     *         CBOR items.
+     *
+     * @since 1.5
+     */
+    protected String prettify(String indent, String indentUnit)
+    {
+        String comment = getComment();
+        String content = toString();
+
+        if (comment != null)
+        {
+            return String.format("/ %s / %s", comment, content);
+        }
+        else
+        {
+            return content;
+        }
     }
 
 

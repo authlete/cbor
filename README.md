@@ -1,9 +1,10 @@
-# Java Library for CBOR, COSE and CWT
+# Java Library for CBOR, COSE, CWT and mdoc
 
 ## Overview
 
 This is a Java library for **CBOR** (Concise Binary Object Representation),
-**COSE** (CBOR Object Signing and Encryption) and **CWT** (CBOR Web Token).
+**COSE** (CBOR Object Signing and Encryption), **CWT** (CBOR Web Token) and
+**mdoc** ([ISO/IEC 18013-5:2021][ISO_IEC_18013_5_2021]).
 
 The current implementation supports the features below. More features will
 be added as the need arises.
@@ -22,6 +23,7 @@ be added as the need arises.
   - [x] Tag Processor
   - [x] CWT Claims Set
   - [ ] ?
+- [x] mdoc
 
 ## License
 
@@ -76,6 +78,10 @@ The list does not necessarily mean that this library supports all of them.
 - IANA: [Concise Binary Object Representation (CBOR) Tags][IANA_cbor_tags]
 - IANA: [CBOR Object Signing and Encryption (COSE)][IANA_cose]
 - IANA: [CBOR Web Token (CWT) Claims][IANA_cwt]
+
+### ISO/IEC
+
+- [ISO/IEC 18013-5:2021][ISO_IEC_18013_5_2021] Personal identification - ISO-compliant driving licence, Part 5: Mobile driving licence (mDL) application
 
 ## Description
 
@@ -621,6 +627,18 @@ CBORItem item = new CBORizer().cborize(map);
 //
 System.out.println(item);
 ```
+
+#### Other Methods for String Representations
+
+The following methods of the `CBORItem` class are available since version 1.5.
+
+- `encodeToBase64()`
+- `encodeToBase64Url()`
+- `encodeToHex()`
+- `prettify()`
+
+The last `prettify()` method returns the CBOR Diagnostic Notation representation
+with pretty formatting.
 
 ### COSE Class Hierarchy
 
@@ -1280,6 +1298,282 @@ COSESign1 message = new COSESign1Builder()
 CWT cwt = new CWT(message);
 ```
 
+### mdoc Building
+
+The `com.authlete.mdoc` package contains classes for building an **mdoc** that
+complies with the [ISO/IEC 18013-5:2021][ISO_IEC_18013_5_2021] standard.
+
+The central utility class is `IssuerSignedBuilder`. The class uses the following
+as input to create an instance of the `IssuerSigned` structure which is defined in
+the "8.3.2.1.2.2 Device retrieval mdoc response" section of the ISO/IEC standard.
+
+- Doc Type
+- Claims
+- Validity Information
+- Device Key (optional)
+- Issuer Key
+- Certificate Chain for Issuer Key
+
+An mdoc, which is represented by the `Document` structure, contains an instance of
+the `IssuerSigned` structure.
+
+The following is a sample code that creates an instance of the `DeviceResponse`
+structure containing a `Document` instance.
+
+```java
+// Doc Type
+String docType = "com.example.doctype";
+
+// Claims
+Map<String, Object> claims = new Gson().fromJson(
+        "{\n" +
+        "  \"com.example.namespace1\": {\n" +
+        "    \"claimName1\": \"claimValue1\"\n" +
+        "  },\n" +
+        "  \"com.example.namespace2\": {\n" +
+        "    \"claimName2\": \"claimValue2\"\n" +
+        "  }\n" +
+        "}",
+        Map.class
+);
+
+// Validity Information
+ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC).withNano(0);
+ValidityInfo validityInfo =
+        new ValidityInfo(now, now, now.plusYears(10));
+
+// Issuer Key
+COSEEC2Key issuerKey = new COSEKeyBuilder()
+        .ktyEC2()
+        .ec2CrvP256()
+        .ec2XInBase64Url("Qw7367PjIwU17ckX_G4ZqLW2EjPG0efV0cYzhvq2Ujk")
+        .ec2YInBase64Url("Mpq3N90VZIBBOqvYgAHi4ZfOSK2gM09_UozgVdRCrt4")
+        .ec2DInBase64Url("IzdjF8wyUSqsCbz8kh6ysJOUcK003aCt9hIGFiGWlzI")
+        .buildEC2Key();
+
+// Certificate for the issuer key in the PEM format.
+String issuerCertPem =
+        "-----BEGIN CERTIFICATE-----\n" +
+        "MIIBXzCCAQSgAwIBAgIGAYwpA4/aMAoGCCqGSM49BAMCMDYxNDAyBgNVBAMMKzNf\n" +
+        "d1F3Y3Qxd28xQzBST3FfWXRqSTRHdTBqVXRiVTJCQXZteEltQzVqS3MwHhcNMjMx\n" +
+        "MjAyMDUzMjI4WhcNMjQwOTI3MDUzMjI4WjA2MTQwMgYDVQQDDCszX3dRd2N0MXdv\n" +
+        "MUMwUk9xX1l0akk0R3UwalV0YlUyQkF2bXhJbUM1aktzMFkwEwYHKoZIzj0CAQYI\n" +
+        "KoZIzj0DAQcDQgAEQw7367PjIwU17ckX/G4ZqLW2EjPG0efV0cYzhvq2Ujkymrc3\n" +
+        "3RVkgEE6q9iAAeLhl85IraAzT39SjOBV1EKu3jAKBggqhkjOPQQDAgNJADBGAiEA\n" +
+        "o4TsuxDl5+3eEp6SHDrBVn1rqOkGGLoOukJhelndGqICIQCpocrjWDwrWexoQZOO\n" +
+        "rwnEYRBmmfhaPor2OZCrbP3U6w==\n" +
+        "-----END CERTIFICATE-----\n";
+
+// Certificate for the issuer key as X509Certificate.
+X509Certificate issuerCert = (X509Certificate)
+        CertificateFactory.getInstance("X.509")
+                .generateCertificate(new ByteArrayInputStream(
+                        issuerCertPem.getBytes(StandardCharsets.UTF_8)));
+
+// Certificate Chain for Issuer Key
+List<X509Certificate> issuerCertChain = List.of(issuerCert);
+
+// Build an "IssuerSigned" instance.
+IssuerSigned issuerSigned = new IssuerSignedBuilder()
+        .setDocType(docType)
+        .setClaims(claims)
+        .setValidityInfo(validityInfo)
+        .setIssuerKey(issuerKey)
+        .setIssuerCertChain(issuerCertChain)
+        .build();
+
+// Build a "Document" instance.
+Document document = new Document(docType, issuerSigned);
+
+// Build a "DeviceResponse" instance.
+DeviceResponse deviceResponse = new DeviceResponse(List.of(document));
+```
+
+Because the `DeviceResponse` structure and all the nested components are CBOR
+items, utility methods of the `CBORItem` class such as `encodeToHex()` and
+`prettify()` can be used to print information about the `DeviceResponse` instance.
+
+```java
+// Hex
+System.out.println(deviceResponse.encodeToHex());
+
+// Diagnostic Notation
+System.out.println(deviceResponse.prettify());
+```
+
+The following are example outputs.
+
+```
+a36776657273696f6e63312e3069646f63756d656e747381a267646f63547970657363
+6f6d2e6578616d706c652e646f63747970656c6973737565725369676e6564a26a6e61
+6d65537061636573a276636f6d2e6578616d706c652e6e616d6573706163653181d818
+5859a4686469676573744944016672616e646f6d5068ad59e8a6b21f099aa9e6632df0
+a82c71656c656d656e744964656e7469666965726a636c61696d4e616d65316c656c65
+6d656e7456616c75656b636c61696d56616c75653176636f6d2e6578616d706c652e6e
+616d6573706163653281d8185859a4686469676573744944026672616e646f6d5026ab
+e1cdb4784a9d20cfcac684b9d8fd71656c656d656e744964656e7469666965726a636c
+61696d4e616d65326c656c656d656e7456616c75656b636c61696d56616c7565326a69
+7373756572417574688443a10126a118215901633082015f30820104a0030201020206
+018c29038fda300a06082a8648ce3d04030230363134303206035504030c2b335f7751
+77637431776f314330524f715f59746a49344775306a55746255324241766d78496d43
+356a4b73301e170d3233313230323035333232385a170d323430393237303533323238
+5a30363134303206035504030c2b335f775177637431776f314330524f715f59746a49
+344775306a55746255324241766d78496d43356a4b733059301306072a8648ce3d0201
+06082a8648ce3d03010703420004430ef7ebb3e3230535edc917fc6e19a8b5b61233c6
+d1e7d5d1c63386fab65239329ab737dd156480413aabd88001e2e197ce48ada0334f7f
+528ce055d442aede300a06082a8648ce3d0403020349003046022100a384ecbb10e5e7
+edde129e921c3ac1567d6ba8e90618ba0eba42617a59dd1aa2022100a9a1cae3583c2b
+59ec6841938eaf09c461106699f85a3e8af63990ab6cfdd4ebd818590131a567766572
+73696f6e63312e306f646967657374416c676f726974686d675348412d3235366c7661
+6c756544696765737473a276636f6d2e6578616d706c652e6e616d65737061636531a1
+0158203431a8678f368d0d7e0f68f0b3ced7ee48b1a38ced261bf2f9d39f7638cda898
+76636f6d2e6578616d706c652e6e616d65737061636532a10258204b8fb0c863f3cf19
+1140f00af3aa736da93c3b12ebc18a351a22aa87b78df66167646f635479706573636f
+6d2e6578616d706c652e646f63747970656c76616c6964697479496e666fa366736967
+6e6564c074323032332d31322d30335430313a35313a31355a6976616c696446726f6d
+c074323032332d31322d30335430313a35313a31355a6a76616c6964556e74696cc074
+323033332d31322d30335430313a35313a31355a5840537c4b3ecb14c034d529c0309b
+b224e0c7381aa992f8f2dd55b7322bda20a19cd8667c1e6747e6bb04f89806623f2b42
+dc788def91ae26b39082f5983cddc61a6673746174757300
+```
+
+```
+{
+  "version": "1.0",
+  "documents": [
+    {
+      "docType": "com.example.doctype",
+      "issuerSigned": {
+        "nameSpaces": {
+          "com.example.namespace1": [
+            24(<<
+              {
+                "digestID": 1,
+                "random": h'68ad59e8a6b21f099aa9e6632df0a82c',
+                "elementIdentifier": "claimName1",
+                "elementValue": "claimValue1"
+              }
+            >>)
+          ],
+          "com.example.namespace2": [
+            24(<<
+              {
+                "digestID": 2,
+                "random": h'26abe1cdb4784a9d20cfcac684b9d8fd',
+                "elementIdentifier": "claimName2",
+                "elementValue": "claimValue2"
+              }
+            >>)
+          ]
+        },
+        "issuerAuth": / COSE_Sign1 / [
+          / protected / <<
+            {
+              / alg / 1: -7 / ES256 /
+            }
+          >>,
+          / unprotected / {
+            / x5chain / 33:
+            h'3082015f30820104a0030201020206018c29038fda300a06082a8648
+            ce3d04030230363134303206035504030c2b335f775177637431776f31
+            4330524f715f59746a49344775306a55746255324241766d78496d4335
+            6a4b73301e170d3233313230323035333232385a170d32343039323730
+            35333232385a30363134303206035504030c2b335f775177637431776f
+            314330524f715f59746a49344775306a55746255324241766d78496d43
+            356a4b733059301306072a8648ce3d020106082a8648ce3d0301070342
+            0004430ef7ebb3e3230535edc917fc6e19a8b5b61233c6d1e7d5d1c633
+            86fab65239329ab737dd156480413aabd88001e2e197ce48ada0334f7f
+            528ce055d442aede300a06082a8648ce3d0403020349003046022100a3
+            84ecbb10e5e7edde129e921c3ac1567d6ba8e90618ba0eba42617a59dd
+            1aa2022100a9a1cae3583c2b59ec6841938eaf09c461106699f85a3e8a
+            f63990ab6cfdd4eb'
+          },
+          / payload / 24(<<
+            {
+              "version": "1.0",
+              "digestAlgorithm": "SHA-256",
+              "valueDigests": {
+                "com.example.namespace1": {
+                  1: h'3431a8678f368d0d7e0f68f0b3ced7ee48b1a38ced261bf2f9d39f7638cda898'
+                },
+                "com.example.namespace2": {
+                  2: h'4b8fb0c863f3cf191140f00af3aa736da93c3b12ebc18a351a22aa87b78df661'
+                }
+              },
+              "docType": "com.example.doctype",
+              "validityInfo": {
+                "signed": 0("2023-12-03T01:51:15Z"),
+                "validFrom": 0("2023-12-03T01:51:15Z"),
+                "validUntil": 0("2033-12-03T01:51:15Z")
+              }
+            }
+          >>),
+          / signature /
+          h'537c4b3ecb14c034d529c0309bb224e0c7381aa992f8f2dd55b7322bda
+          20a19cd8667c1e6747e6bb04f89806623f2b42dc788def91ae26b39082f5
+          983cddc61a'
+        ]
+      }
+    }
+  ],
+  "status": 0
+}
+```
+
+#### Claims for mdoc
+
+The claims given by the `setClaims(Map<String, Object>)` method are used to
+construct `IssuerSignedItem` instances.
+
+The keys of the top-level properties in the claims map must be strings
+representing **name spaces**, and their values must be JSON objects, each of
+which contains claims under the corresponding name space.
+
+The following JSON shows the structure that the claims map should have.
+
+```json
+{
+    "com.example.namespace1" : {
+        "claimName1": "claimValue1",
+        "claimName2": true,
+        "claimName3": 1
+    },
+    "com.example.namespace2" : {
+        "claimName4": [ "element1", "element2" ],
+        "claimName5": {
+          "subClaimName1": "subClaimValue1"
+        }
+    }
+}
+```
+
+Types of claim values can be strings, boolean values, integers, floating-point
+numbers, arrays (`List`) and maps (`Map`), which are natural representations of
+JSON values.
+
+However, there may be cases where CBOR-specific data need to be embedded. For
+example, the `"birth_date"` claim may require the "full-date" tag (defined in
+[RFC 8943][RFC_8943]) and the `"portrait"` claim may require binary data.
+
+To embed CBOR-specific data, a `CBORizer` instance with an implementation of
+the `CBORDiagnosticNotationParser` interface needs to be set by calling the
+`setCBORizer(CBORizer)` method. Such `CBORizer` will interpret strings written
+in the CBOR Diagnostic Notation
+([RFC 8949, 8. Diagnostic Notation][RFC_8949_diagnostic_notation], and
+[RFC 8610, Appendix G. Extended Diagnostic Notation][RFC_8610_appendix_G])
+with a special prefix (e.g. `"cbor:"`), and convert them into CBOR-specific
+data. As a result, input data like below will be accepted and CBOR-specific
+data will be embedded accordingly.
+
+```java
+{
+    "com.example.namespace3": {
+        "birth_date": "cbor:1004(\"1974-05-06\")",
+        "portrait": "cbor:h'0102.....'"
+    }
+}
+```
+
 ## Contact
 
 Authlete Contact Form: https://www.authlete.com/contact/
@@ -1291,6 +1585,7 @@ Authlete Contact Form: https://www.authlete.com/contact/
 [RFC_8230]: https://www.rfc-editor.org/rfc/rfc8230.html
 [RFC_8392]: https://www.rfc-editor.org/rfc/rfc8392.html
 [RFC_8610]: https://www.rfc-editor.org/rfc/rfc8610.html
+[RFC_8610_appendix_G]: https://www.rfc-editor.org/rfc/rfc8610#appendix-G
 [RFC_8613]: https://www.rfc-editor.org/rfc/rfc8613.html
 [RFC_8742]: https://www.rfc-editor.org/rfc/rfc8742.html
 [RFC_8746]: https://www.rfc-editor.org/rfc/rfc8746.html
@@ -1311,3 +1606,5 @@ Authlete Contact Form: https://www.authlete.com/contact/
 [IANA_cbor_tags]: https://www.iana.org/assignments/cbor-tags/cbor-tags.xhtml
 [IANA_cose]: https://www.iana.org/assignments/cose/cose.xhtml
 [IANA_cwt]: https://www.iana.org/assignments/cwt/cwt.xhtml
+
+[ISO_IEC_18013_5_2021]: https://www.iso.org/standard/69084.html

@@ -124,6 +124,25 @@ public class COSESignBuilder
 
 
     /**
+     * Set a payload.
+     *
+     * @param payload
+     *         A payload.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSESignBuilder payload(CBORItem payload)
+    {
+        this.payload = payload;
+
+        return this;
+    }
+
+
+    /**
      * Add a {@code COSE_Signature} element.
      *
      * @param signature

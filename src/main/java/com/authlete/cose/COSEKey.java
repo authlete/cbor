@@ -66,7 +66,7 @@ public class COSEKey extends CBORPairList
      * @param pairs
      *         Key parameters.
      */
-    public COSEKey(List<CBORPair> pairs)
+    public COSEKey(List<? extends CBORPair> pairs)
     {
         super(pairs);
 
@@ -74,7 +74,7 @@ public class COSEKey extends CBORPairList
     }
 
 
-    private void validateParameters(List<CBORPair> pairs)
+    private void validateParameters(List<? extends CBORPair> pairs)
     {
         for (CBORPair pair : pairs)
         {
@@ -204,7 +204,7 @@ public class COSEKey extends CBORPairList
                     "key_ops (4) must be a CBOR array.");
         }
 
-        List<CBORItem> items = ((CBORItemList)value).getItems();
+        List<? extends CBORItem> items = ((CBORItemList)value).getItems();
 
         if (items == null || items.size() == 0)
         {
@@ -651,7 +651,7 @@ public class COSEKey extends CBORPairList
         }
 
         // Key-value pairs in the CBOR map.
-        List<CBORPair> pairs = ((CBORPairList)item).getPairs();
+        List<? extends CBORPair> pairs = ((CBORPairList)item).getPairs();
 
         // If the CBOR map that represents a COSE key has no key-value pairs.
         if (pairs == null)
@@ -674,7 +674,7 @@ public class COSEKey extends CBORPairList
     }
 
 
-    private static Object extractKty(List<CBORPair> pairs) throws COSEException
+    private static Object extractKty(List<? extends CBORPair> pairs) throws COSEException
     {
         // The "kty (1)" label.
         Integer labelKty = Integer.valueOf(COSEKeyCommonParameters.KTY);
@@ -712,7 +712,7 @@ public class COSEKey extends CBORPairList
     }
 
 
-    private static COSEKey buildKey(int kty, List<CBORPair> pairs) throws COSEException
+    private static COSEKey buildKey(int kty, List<? extends CBORPair> pairs) throws COSEException
     {
         try
         {

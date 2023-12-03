@@ -17,6 +17,7 @@ package com.authlete.cose;
 
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,28 @@ import com.authlete.cose.constants.COSEKeyTypes;
  */
 public class COSEKeyBuilder
 {
+    /**
+     * Decoder for base64url.
+     */
+    private static final Base64.Decoder BASE64URL_DECODER = Base64.getUrlDecoder();
+
+
     private final Map<Object, Object> map = new LinkedHashMap<>();
+
+
+    /**
+     * Decode the given string in the base64url format into a byte array.
+     *
+     * @param input
+     *         A string in the base64url format.
+     *
+     * @return
+     *         A decoded byte array.
+     */
+    private static byte[] decodeBase64Url(String input)
+    {
+        return BASE64URL_DECODER.decode(input);
+    }
 
 
     /**
@@ -282,6 +304,23 @@ public class COSEKeyBuilder
 
 
     /**
+     * Set the "Base IV (5)" parameter.
+     *
+     * @param baseIv
+     *         The base IV, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder baseIvInBase64Url(String baseIv)
+    {
+        return baseIv(decodeBase64Url(baseIv));
+    }
+
+
+    /**
      * Set the "crv (-1)" parameter for the key type "OKP".
      *
      * @param crv
@@ -375,6 +414,23 @@ public class COSEKeyBuilder
 
 
     /**
+     * Set the "x (-2)" parameter for the key type "OKP".
+     *
+     * @param x
+     *         The public key, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder okpXInBase64Url(String x)
+    {
+        return okpX(decodeBase64Url(x));
+    }
+
+
+    /**
      * Set the "d (-4)" parameter for the key type "OKP".
      *
      * @param d
@@ -386,6 +442,23 @@ public class COSEKeyBuilder
     public COSEKeyBuilder okpD(byte[] d)
     {
         return put(COSEKeyTypeParameters.OKP_D, d);
+    }
+
+
+    /**
+     * Set the "d (-4)" parameter for the key type "OKP".
+     *
+     * @param d
+     *         The private key, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder okpDInBase64Url(String d)
+    {
+        return okpD(decodeBase64Url(d));
     }
 
 
@@ -483,6 +556,23 @@ public class COSEKeyBuilder
 
 
     /**
+     * Set the "x (-2)" parameter for the key type "EC2".
+     *
+     * @param x
+     *         The x-coordinate, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder ec2XInBase64Url(String x)
+    {
+        return ec2X(decodeBase64Url(x));
+    }
+
+
+    /**
      * Set the "y (-3)" parameter for the key type "EC2".
      *
      * @param y
@@ -494,6 +584,23 @@ public class COSEKeyBuilder
     public COSEKeyBuilder ec2Y(byte[] y)
     {
         return put(COSEKeyTypeParameters.EC2_Y, y);
+    }
+
+
+    /**
+     * Set the "y (-3)" parameter for the key type "EC2".
+     *
+     * @param y
+     *         The y-coordinate, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder ec2YInBase64Url(String y)
+    {
+        return ec2Y(decodeBase64Url(y));
     }
 
 
@@ -528,6 +635,23 @@ public class COSEKeyBuilder
 
 
     /**
+     * Set the "d (-4)" parameter for the key type "EC2".
+     *
+     * @param d
+     *         The private key, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder ec2DInBase64Url(String d)
+    {
+        return ec2D(decodeBase64Url(d));
+    }
+
+
+    /**
      * Set the "n (-1)" parameter for the key type "RSA".
      *
      * @param n
@@ -539,6 +663,23 @@ public class COSEKeyBuilder
     public COSEKeyBuilder rsaN(byte[] n)
     {
         return put(COSEKeyTypeParameters.RSA_N, n);
+    }
+
+
+    /**
+     * Set the "n (-1)" parameter for the key type "RSA".
+     *
+     * @param n
+     *         The RSA modulus n, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder rsaNInBase64Url(String n)
+    {
+        return rsaN(decodeBase64Url(n));
     }
 
 
@@ -558,6 +699,23 @@ public class COSEKeyBuilder
 
 
     /**
+     * Set the "e (-2)" parameter for the key type "RSA".
+     *
+     * @param e
+     *         The RSA public exponent e, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder rsaEInBase64Url(String e)
+    {
+        return rsaE(decodeBase64Url(e));
+    }
+
+
+    /**
      * Set the "d (-3)" parameter for the key type "RSA".
      *
      * @param d
@@ -569,6 +727,23 @@ public class COSEKeyBuilder
     public COSEKeyBuilder rsaD(byte[] d)
     {
         return put(COSEKeyTypeParameters.RSA_D, d);
+    }
+
+
+    /**
+     * Set the "d (-3)" parameter for the key type "RSA".
+     *
+     * @param d
+     *         The RSA private exponent d, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder rsaDInBase64Url(String d)
+    {
+        return rsaD(decodeBase64Url(d));
     }
 
 
@@ -588,6 +763,23 @@ public class COSEKeyBuilder
 
 
     /**
+     * Set the "p (-4)" parameter for the key type "RSA".
+     *
+     * @param p
+     *         The prime factor p of n, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder rsaPInBase64Url(String p)
+    {
+        return rsaP(decodeBase64Url(p));
+    }
+
+
+    /**
      * Set the "q (-5)" parameter for the key type "RSA".
      *
      * @param q
@@ -599,6 +791,23 @@ public class COSEKeyBuilder
     public COSEKeyBuilder rsaQ(byte[] q)
     {
         return put(COSEKeyTypeParameters.RSA_Q, q);
+    }
+
+
+    /**
+     * Set the "q (-5)" parameter for the key type "RSA".
+     *
+     * @param q
+     *         The prime factor q of n, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder rsaQInBase64url(String q)
+    {
+        return rsaQ(decodeBase64Url(q));
     }
 
 
@@ -618,6 +827,23 @@ public class COSEKeyBuilder
 
 
     /**
+     * Set the "dP (-6)" parameter for the key type "RSA".
+     *
+     * @param dP
+     *         d mod (p -1), expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder rsaDPInBase64Url(String dP)
+    {
+        return rsaDP(decodeBase64Url(dP));
+    }
+
+
+    /**
      * Set the "dQ (-7)" parameter for the key type "RSA".
      *
      * @param dQ
@@ -633,6 +859,23 @@ public class COSEKeyBuilder
 
 
     /**
+     * Set the "dQ (-7)" parameter for the key type "RSA".
+     *
+     * @param dQ
+     *         d mod (q -1), expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder rsaDQInBase64Url(String dQ)
+    {
+        return rsaDQ(decodeBase64Url(dQ));
+    }
+
+
+    /**
      * Set the "qInv (-8)" parameter for the key type "RSA".
      *
      * @param qInv
@@ -644,6 +887,23 @@ public class COSEKeyBuilder
     public COSEKeyBuilder rsaQInv(byte[] qInv)
     {
         return put(COSEKeyTypeParameters.RSA_QINV, qInv);
+    }
+
+
+    /**
+     * Set the "qInv (-8)" parameter for the key type "RSA".
+     *
+     * @param qInv
+     *         The CRT coefficient q^(-1) mod p, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder rsaQInvInBase64Url(String qInv)
+    {
+        return rsaQInv(decodeBase64Url(qInv));
     }
 
 
@@ -678,6 +938,24 @@ public class COSEKeyBuilder
 
 
     /**
+     * Set the "r_i (-10)" parameter for the key type "RSA".
+     *
+     * @param r_i
+     *         A prime factor r_i of n, where i >= 3.
+     *         Expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder rsaRIInBase64Url(String r_i)
+    {
+        return rsaRI(decodeBase64Url(r_i));
+    }
+
+
+    /**
      * Set the "d_i (-11)" parameter for the key type "RSA".
      *
      * @param d_i
@@ -689,6 +967,24 @@ public class COSEKeyBuilder
     public COSEKeyBuilder rsaDI(byte[] d_i)
     {
         return put(COSEKeyTypeParameters.RSA_D_I, d_i);
+    }
+
+
+    /**
+     * Set the "d_i (-11)" parameter for the key type "RSA".
+     *
+     * @param d_i
+     *         d mod (r_i - 1).
+     *         Expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder rsaDIInBase64Url(String d_i)
+    {
+        return rsaDI(decodeBase64Url(d_i));
     }
 
 
@@ -708,6 +1004,24 @@ public class COSEKeyBuilder
 
 
     /**
+     * Set the "t_i (-12)" parameter for the key type "RSA".
+     *
+     * @param t_i
+     *         The CRT coefficient t_i = (r_1 * r_2 * ... * r_(i-1))^(-1) mod r_i.
+     *         Expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder rsaTIInBase64Url(String t_i)
+    {
+        return rsaTI(decodeBase64Url(t_i));
+    }
+
+
+    /**
      * Set the "k (-1)" parameter for the key type "Symmetric".
      *
      * @param k
@@ -723,6 +1037,23 @@ public class COSEKeyBuilder
 
 
     /**
+     * Set the "k (-1)" parameter for the key type "Symmetric".
+     *
+     * @param k
+     *         The key value, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder symmetricKInBase64Url(String k)
+    {
+        return symmetricK(decodeBase64Url(k));
+    }
+
+
+    /**
      * Set the "pub (-1)" parameter for the key type "HSS-LMS".
      *
      * @param pub
@@ -734,6 +1065,23 @@ public class COSEKeyBuilder
     public COSEKeyBuilder hssLmsPub(byte[] pub)
     {
         return put(COSEKeyTypeParameters.HSS_LMS_PUB, pub);
+    }
+
+
+    /**
+     * Set the "pub (-1)" parameter for the key type "HSS-LMS".
+     *
+     * @param pub
+     *         The public key, expressed in the base64url format.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSEKeyBuilder hssLmsPubInBase64Url(String pub)
+    {
+        return hssLmsPub(decodeBase64Url(pub));
     }
 
 
@@ -827,7 +1175,7 @@ public class COSEKeyBuilder
     }
 
 
-    private List<CBORPair> toPairs()
+    private List<? extends CBORPair> toPairs()
     {
         return ((CBORPairList)new CBORizer().cborizeMap(map)).getPairs();
     }
