@@ -42,6 +42,30 @@ import com.authlete.cbor.token.CBORTokenizer;
  */
 public class CBORFloat extends CBORNumber<Float>
 {
+    /**
+     * Positive infinity.
+     *
+     * @since 1.6
+     */
+    public static final CBORFloat POSITIVE_INFINITY = new CBORFloat(Float.POSITIVE_INFINITY);
+
+
+    /**
+     * Negative infinity.
+     *
+     * @since 1.6
+     */
+    public static final CBORFloat NEGATIVE_INFINITY = new CBORFloat(Float.NEGATIVE_INFINITY);
+
+
+    /**
+     * NaN.
+     *
+     * @since 1.6
+     */
+    public static final CBORFloat NaN = new CBORFloat(Float.NaN);
+
+
     public CBORFloat(Float value)
     {
         super(value);

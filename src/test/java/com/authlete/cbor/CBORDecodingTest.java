@@ -1471,4 +1471,46 @@ public class CBORDecodingTest
         testByteArrayToString("h''", "", false);
         testByteArrayToString("<<>>", "", true);
     }
+
+
+    @Test
+    public void test_float_positive_infinity()
+    {
+        testFloat(Float.POSITIVE_INFINITY, CBORFloat.POSITIVE_INFINITY);
+    }
+
+
+    @Test
+    public void test_float_negative_infinity()
+    {
+        testFloat(Float.NEGATIVE_INFINITY, CBORFloat.NEGATIVE_INFINITY);
+    }
+
+
+    @Test
+    public void test_float_nan()
+    {
+        testFloat(Float.NaN, CBORFloat.NaN);
+    }
+
+
+    @Test
+    public void test_double_positive_infinity()
+    {
+        testDouble(Double.POSITIVE_INFINITY, CBORDouble.POSITIVE_INFINITY);
+    }
+
+
+    @Test
+    public void test_double_negative_infinity()
+    {
+        testDouble(Double.NEGATIVE_INFINITY, CBORDouble.NEGATIVE_INFINITY);
+    }
+
+
+    @Test
+    public void test_double_nan()
+    {
+        testDouble(Double.NaN, CBORDouble.NaN);
+    }
 }

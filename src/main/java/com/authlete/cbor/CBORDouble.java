@@ -34,6 +34,30 @@ import java.io.OutputStream;
  */
 public class CBORDouble extends CBORNumber<Double>
 {
+    /**
+     * Positive infinity.
+     *
+     * @since 1.6
+     */
+    public static final CBORDouble POSITIVE_INFINITY = new CBORDouble(Double.POSITIVE_INFINITY);
+
+
+    /**
+     * Negative infinity.
+     *
+     * @since 1.6
+     */
+    public static final CBORDouble NEGATIVE_INFINITY = new CBORDouble(Double.NEGATIVE_INFINITY);
+
+
+    /**
+     * NaN.
+     *
+     * @since 1.6
+     */
+    public static final CBORDouble NaN = new CBORDouble(Double.NaN);
+
+
     public CBORDouble(Double value)
     {
         super(value);

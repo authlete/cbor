@@ -1,6 +1,16 @@
 CHANGES
 =======
 
+- `CBORDouble` class
+  * Add `POSITIVE_INFINITY`.
+  * Add `NEGATIVE_INFINITY`.
+  * Add `NaN`.
+
+- `CBORFloat` class
+  * Add `POSITIVE_INFINITY`.
+  * Add `NEGATIVE_INFINITY`.
+  * Add `NaN`.
+
 1.5 (2023-12-03)
 ----------------
 
