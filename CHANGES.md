@@ -1,6 +1,9 @@
 CHANGES
 =======
 
+1.6 (2023-12-03)
+----------------
+
 - `CBORDouble` class
   * Add `POSITIVE_INFINITY`.
   * Add `NEGATIVE_INFINITY`.
