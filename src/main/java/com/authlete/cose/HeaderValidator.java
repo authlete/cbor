@@ -47,7 +47,7 @@ class HeaderValidator
     private static final String X509 = "X.509";
 
 
-    static Map<Object, Object> validate(List<CBORPair> pairs, boolean unprotected)
+    static Map<Object, Object> validate(List<? extends CBORPair> pairs, boolean unprotected)
     {
         Map<Object, Object> parameters = new LinkedHashMap<>();
 
@@ -185,7 +185,7 @@ class HeaderValidator
         }
 
         // Elements of "crit (2)".
-        List<CBORItem> items = ((CBORItemList)value).getItems();
+        List<? extends CBORItem> items = ((CBORItemList)value).getItems();
 
         // If "crit (2)" has no element.
         if (items == null || items.size() == 0)
@@ -338,7 +338,7 @@ class HeaderValidator
     }
 
 
-    private static List<X509Certificate> validateX5ChainArray(List<CBORItem> items)
+    private static List<X509Certificate> validateX5ChainArray(List<? extends CBORItem> items)
     {
         if (items == null || items.size() == 0)
         {

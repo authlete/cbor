@@ -106,7 +106,7 @@ public class COSEMac extends COSEMessage
                     "A recipient list given to COSEMac's constructor must not be null.");
         }
 
-        List<CBORItem> items = recipients.getItems();
+        List<? extends CBORItem> items = recipients.getItems();
 
         if (items == null || items.size() == 0)
         {
@@ -213,7 +213,7 @@ public class COSEMac extends COSEMessage
             return new COSEMac(
                     (COSEProtectedHeader)common.get(0),
                     (COSEUnprotectedHeader)common.get(1),
-                    buildDecodableByteArrayIfPossible(common.get(2)),
+                    common.get(2),
                     (CBORByteArray)fourth,
                     recipients);
         }
@@ -226,7 +226,7 @@ public class COSEMac extends COSEMessage
 
     private static CBORItemList buildRecipients(CBORItemList list) throws COSEException
     {
-        List<CBORItem> items = list.getItems();
+        List<? extends CBORItem> items = list.getItems();
 
         if (items == null || items.size() == 0)
         {

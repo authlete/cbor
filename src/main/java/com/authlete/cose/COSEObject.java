@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import com.authlete.cbor.CBORByteArray;
-import com.authlete.cbor.CBORDecoderException;
 import com.authlete.cbor.CBORItem;
 import com.authlete.cbor.CBORItemList;
 import com.authlete.cbor.CBORNull;
+import com.authlete.cbor.CBORTaggedItem;
 
 
 /**
@@ -124,6 +124,36 @@ public abstract class COSEObject extends CBORItemList
 
     private static void validateContent(CBORItem content)
     {
+        // The COSE specification (RFC 9052) requires that the content be either
+        // a byte string or a CBOR null. However, this implementation accepts a
+        // "tagged" content, too. The following "while" loop strips tags to
+        // extract the actual content.
+        //
+        // This step has been introduced to make it possible to generate mdoc-based
+        // verifiable credentials that conform to the "ISO/IEC 18013-5:2021" standard.
+        //
+        // The ISO/IEC standard defines "IssuerAuth" and "MobileSecurityObjectBytes"
+        // as follows.
+        //
+        //     IssuerAuth = COSE_Sign1 ; The payload is MobileSecurityObjectBytes
+        //
+        //     MobileSecurityObjectBytes = #6.24(bstr .cbor MobileSecurityObject)
+        //
+        // According to this definition, instances of MobileSecurityObjectBytes
+        // cannot be byte strings. However, the ISO/IEC standard mandates that a
+        // MobileSecurityObjectBytes instance serves as the payload of COSE_Sign1.
+        // This requirement appears to be in violation of the COSE specification.
+        //
+        // However, there is also the possibility that my understanding is incorrect.
+        // I might be overlooking detailed specifications regarding the handling of
+        // tags. In any case, the following processing is necessary to accept a CBOR
+        // item wrapped in a tag.
+        //
+        while (content instanceof CBORTaggedItem)
+        {
+            content = ((CBORTaggedItem)content).getTagContent();
+        }
+
         if (content instanceof CBORByteArray || content instanceof CBORNull)
         {
             // OK
@@ -170,7 +200,7 @@ public abstract class COSEObject extends CBORItemList
             CBORItem object, String name, int size) throws COSEException
     {
         // Interpret the COSE object as a CBOR array and extract elements.
-        List<CBORItem> elements = extractElements(object, name, size);
+        List<? extends CBORItem> elements = extractElements(object, name, size);
 
         // Build a protected header from the first element.
         COSEProtectedHeader protectedHeader =
@@ -203,7 +233,7 @@ public abstract class COSEObject extends CBORItemList
     }
 
 
-    private static List<CBORItem> extractElements(
+    private static List<? extends CBORItem> extractElements(
             CBORItem object, String name, int size) throws COSEException
     {
         // If the COSE object is not a CBOR array.
@@ -214,7 +244,7 @@ public abstract class COSEObject extends CBORItemList
         }
 
         // Elements in the CBOR array.
-        List<CBORItem> elements = ((CBORItemList)object).getItems();
+        List<? extends CBORItem> elements = ((CBORItemList)object).getItems();
 
         // If the COSE object is empty.
         if (elements == null)
@@ -285,40 +315,5 @@ public abstract class COSEObject extends CBORItemList
 
         throw new COSEException(String.format(
                 "The third element of %s must be a byte array or null.", name));
-    }
-
-
-    static CBORItem buildDecodableByteArrayIfPossible(CBORItem item)
-    {
-        // If the CBOR data item is not a byte string.
-        if (!(item instanceof CBORByteArray))
-        {
-            // Use the item as is.
-            return item;
-        }
-
-        CBORByteArray bstr = (CBORByteArray)item;
-
-        try
-        {
-            // Try to decode the content of the byte string as
-            // CBOR data items.
-            List<CBORItem> items = bstr.decodeValue();
-
-            // If the byte array contains one or more CBOR data items.
-            if (items != null && items.size() != 0)
-            {
-                // Create a new byte string marked as decodable.
-                return new CBORByteArray(bstr.getValue(), true);
-            }
-        }
-        catch (CBORDecoderException cause)
-        {
-            // The content of the byte string failed to be decoded
-            // as a CBOR data item.
-        }
-
-        // Use the item as is.
-        return item;
     }
 }

@@ -61,14 +61,14 @@ public class COSEOKPKey extends COSEKey
      * @param pairs
      *         Key parameters.
      */
-    public COSEOKPKey(List<CBORPair> pairs)
+    public COSEOKPKey(List<? extends CBORPair> pairs)
     {
         super(pairs);
 
         validateParameters(pairs);
     }
 
-    private void validateParameters(List<CBORPair> pairs)
+    private void validateParameters(List<? extends CBORPair> pairs)
     {
         for (CBORPair pair : pairs)
         {

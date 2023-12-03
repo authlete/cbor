@@ -90,7 +90,7 @@ public class COSEEncrypt extends COSEMessage
                     "A recipient list given to COSEEncrypt's constructor must not be null.");
         }
 
-        List<CBORItem> items = recipients.getItems();
+        List<? extends CBORItem> items = recipients.getItems();
 
         if (items == null || items.size() == 0)
         {
@@ -187,7 +187,7 @@ public class COSEEncrypt extends COSEMessage
 
     private static CBORItemList buildRecipients(CBORItemList list) throws COSEException
     {
-        List<CBORItem> items = list.getItems();
+        List<? extends CBORItem> items = list.getItems();
 
         if (items == null || items.size() == 0)
         {

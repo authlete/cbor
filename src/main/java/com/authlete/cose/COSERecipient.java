@@ -112,7 +112,7 @@ public class COSERecipient extends COSEObject
                     "A recipient list given to COSERecipient's constructor must not be null.");
         }
 
-        List<CBORItem> items = recipients.getItems();
+        List<? extends CBORItem> items = recipients.getItems();
 
         if (items == null || items.size() == 0)
         {
@@ -229,7 +229,7 @@ public class COSERecipient extends COSEObject
 
     private static CBORItemList buildRecipients(CBORItemList list) throws COSEException
     {
-        List<CBORItem> items = list.getItems();
+        List<? extends CBORItem> items = list.getItems();
 
         if (items == null || items.size() == 0)
         {

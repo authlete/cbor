@@ -82,6 +82,8 @@ public abstract class COSEMessage extends COSEObject
         }
 
         this.type = type;
+
+        setComment(type.getName());
     }
 
 

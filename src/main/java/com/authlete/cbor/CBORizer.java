@@ -30,6 +30,162 @@ import java.util.Map;
 public class CBORizer
 {
     /**
+     * The default value of the prefix to indicate that the substring of the
+     * string given to the {@link #cborizeString(String)} method should be
+     * interpreted as the CBOR Diagnostic Notation.
+     */
+    private static final String DEFAULT_DIAGNOSTIC_NOTATION_PREFIX = "cbor:";
+
+
+    /**
+     * The prefix to indicate that the substring of the string given to the
+     * {@link #cborizeString(String)} method should be interpreted as the
+     * CBOR Diagnostic Notation.
+     */
+    private String mDiagnosticNotationPrefix = DEFAULT_DIAGNOSTIC_NOTATION_PREFIX;
+
+
+    /**
+     * The parser that interprets the CBOR Diagnostic Notation.
+     */
+    private CBORDiagnosticNotationParser mDiagnosticNotationParser;
+
+
+    /**
+     * Get the prefix to indicate that the substring of the string given to
+     * the {@link #cborizeString(String)} method should be interpreted as the
+     * CBOR Diagnostic Notation.
+     *
+     * @return
+     *         The prefix to invoke the CBOR Diagnostic Notation parser.
+     *
+     * @since 1.5
+     *
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc8949#section-8"
+     *      >RFC 8949 Concise Binary Object Representation (CBOR),
+     *       8 Diagnostic Notation</a>
+     *
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc8610#appendix-G"
+     *      >RFC 8610 Concise Data Definition Language (CDDL):
+     *       A Notational Convention to Express Concise Binary Object
+     *       Representation (CBOR) and JSON Data Structures,
+     *       Appendix G. Extended Diagnostic Notation</a>
+     */
+    public String getDiagnosticNotationPrefix()
+    {
+        return mDiagnosticNotationPrefix;
+    }
+
+
+    /**
+     * Set the prefix to indicate that the substring of the string given to
+     * the {@link #cborizeString(String)} method should be interpreted as the
+     * CBOR Diagnostic Notation.
+     *
+     * <p>
+     * For example, if the prefix is {@code "cbor:"} (which is the default value),
+     * when {@code "cbor:h'0102'"} is given to the {@link #cborizeString(String)}
+     * method, the substring after the prefix, which is {@code "h'0102'"} in this
+     * example, is passed to the parser's {@link
+     * CBORDiagnosticNotationParser#parseItem(String) parseItem(String)} method.
+     * The parser will generate a {@link CBORByteArray} instance that contains
+     * the two bytes, 0x01 and 0x02.
+     * </p>
+     *
+     * <p>
+     * If {@code null} or an empty string is set as the prefix, it will result in
+     * that every non-null string is processed by the parser unconditionally.
+     * Therefore, for example, a string {@code "123"} will be converted into a
+     * {@link CBORInteger} instance that represents the decimal integer, 123.
+     * If 123 needs to be processed as a string, {@code "\"123\""} must be given.
+     * </p>
+     *
+     * <p>
+     * If a CBOR Diagnostic Notation parser is not set to this {@code CBORizer}
+     * instance, this prefix is not used, and conversion based on the CBOR
+     * Diagnostic Notation is not performed.
+     * </p>
+     *
+     * @param prefix
+     *         The prefix to invoke the CBOR Diagnostic Notation parser.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     *
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc8949#section-8"
+     *      >RFC 8949 Concise Binary Object Representation (CBOR),
+     *       8 Diagnostic Notation</a>
+     *
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc8610#appendix-G"
+     *      >RFC 8610 Concise Data Definition Language (CDDL):
+     *       A Notational Convention to Express Concise Binary Object
+     *       Representation (CBOR) and JSON Data Structures,
+     *       Appendix G. Extended Diagnostic Notation</a>
+     */
+    public CBORizer setDiagnosticNotationPrefix(String prefix)
+    {
+        mDiagnosticNotationPrefix = prefix;
+
+        return this;
+    }
+
+
+    /**
+     * Get the parser that interprets the CBOR Diagnostic Notation.
+     *
+     * @return
+     *         The CBOR Diagnostic Notation parser.
+     *
+     * @since 1.5
+     *
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc8949#section-8"
+     *      >RFC 8949 Concise Binary Object Representation (CBOR),
+     *       8 Diagnostic Notation</a>
+     *
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc8610#appendix-G"
+     *      >RFC 8610 Concise Data Definition Language (CDDL):
+     *       A Notational Convention to Express Concise Binary Object
+     *       Representation (CBOR) and JSON Data Structures,
+     *       Appendix G. Extended Diagnostic Notation</a>
+     */
+    public CBORDiagnosticNotationParser getDiagnosticNotationParser()
+    {
+        return mDiagnosticNotationParser;
+    }
+
+
+    /**
+     * Set the parser that interprets the CBOR Diagnostic Notation.
+     *
+     * @param parser
+     *         The CBOR Diagnostic Notation parser.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     *
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc8949#section-8"
+     *      >RFC 8949 Concise Binary Object Representation (CBOR),
+     *       8 Diagnostic Notation</a>
+     *
+     * @see <a href="https://www.rfc-editor.org/rfc/rfc8610#appendix-G"
+     *      >RFC 8610 Concise Data Definition Language (CDDL):
+     *       A Notational Convention to Express Concise Binary Object
+     *       Representation (CBOR) and JSON Data Structures,
+     *       Appendix G. Extended Diagnostic Notation</a>
+     */
+    public CBORizer setDiagnosticNotationParser(CBORDiagnosticNotationParser parser)
+    {
+        mDiagnosticNotationParser = parser;
+
+        return this;
+    }
+
+
+    /**
      * Return {@link CBORBoolean#FALSE} or {@link CBORBoolean#TRUE} according
      * to the given value.
      *
@@ -150,12 +306,31 @@ public class CBORizer
     /**
      * Create a {@link CBORString} instance with the given value.
      *
+     * <p>
+     * When {@code null} is given, {@link CBORNull#INSTANCE} is returned.
+     * Otherwise, a {@link CBORString} instance that represents the given
+     * string is returned.
+     * </p>
+     *
+     * <p>
+     * However, if a {@link CBORDiagnosticNotationParser} instance is set to
+     * this {@code CBORizer} instance (cf. {@link
+     * #setDiagnosticNotationParser(CBORDiagnosticNotationParser)}), and if
+     * the prefix of the given string indicates that the string should be
+     * interpreted as CBOR Diagnostic Notation (cf. {@link
+     * #setDiagnosticNotationPrefix(String)}), the substring after the prefix
+     * is passed to the {@link CBORDiagnosticNotationParser#parseItem(String)
+     * parseItem(String)} method of the parser, and the object returned from
+     * the parser is returned from this method.
+     * </p>
+     *
      * @param value
-     *         A string. When {@code null} is given,
-     *         {@link CBORNull#INSTANCE} is returned.
+     *         An input string.
      *
      * @return
-     *         A new {@link CBORString} instance or {@link CBORNull#INSTANCE}.
+     *         A new CBOR item built from the given string. In typical cases,
+     *         a {@link CBORString} instance that represents the given string
+     *         is returned.
      */
     public CBORItem cborizeString(String value)
     {
@@ -164,6 +339,37 @@ public class CBORizer
             return CBORNull.INSTANCE;
         }
 
+        // The parser for CBOR Diagnostic Notation.
+        CBORDiagnosticNotationParser parser = getDiagnosticNotationParser();
+
+        // If no parser is set to this CBORizer instance.
+        if (parser == null)
+        {
+            // Build a CBOR text string that represents the given string.
+            return new CBORString(value);
+        }
+
+        // The prefix indicating whether the given string should be interpreted
+        // as CBOR Diagnostic Notation or not.
+        String prefix = getDiagnosticNotationPrefix();
+
+        // If the prefix is null or an empty string. This happens only when the
+        // developer has explicitly set the prefix so because the default value
+        // of the prefix is neither null nor an empty string.
+        if (prefix == null || prefix.isEmpty())
+        {
+            // Parse the given string as CBOR Diagnostic Notation unconditionally.
+            return parser.parseItem(value);
+        }
+
+        // If the given string starts with the prefix.
+        if (value.startsWith(prefix))
+        {
+            // Parse the substring after the prefix as CBOR Diagnostic Notation.
+            return parser.parseItem(value.substring(prefix.length()));
+        }
+
+        // Build a CBOR text string that represents the given string.
         return new CBORString(value);
     }
 

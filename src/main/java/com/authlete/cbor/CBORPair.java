@@ -30,6 +30,8 @@ public class CBORPair
 {
     private final CBORItem key;
     private final CBORItem value;
+    private String keyComment;
+    private String valueComment;
 
 
     /**
@@ -43,8 +45,35 @@ public class CBORPair
      */
     public CBORPair(CBORItem key, CBORItem value)
     {
-        this.key   = (key   != null) ? key   : CBORNull.INSTANCE;
-        this.value = (value != null) ? value : CBORNull.INSTANCE;
+        this(key, value, /* keyComment */ null, /* valueComment */ null);
+    }
+
+
+    /**
+     * A constructor with a key, a value and a comment.
+     *
+     * @param key
+     *         A key. If {@code null} is given, {@link CBORNull#INSTANCE} is used.
+     *
+     * @param value
+     *         A value. If {@code null} is given, {@link CBORNull#INSTANCE} is used.
+     *
+     * @param keyComment
+     *         A comment for the key. This comment is referenced by the
+     *         {@link #prettify(String, String)} method.
+     *
+     * @param valueComment
+     *         A comment for the value. This comment is referenced by the
+     *         {@link #prettify(String, String)} method.
+     *
+     * @since 1.5
+     */
+    public CBORPair(CBORItem key, CBORItem value, String keyComment, String valueComment)
+    {
+        this.key          = (key   != null) ? key   : CBORNull.INSTANCE;
+        this.value        = (value != null) ? value : CBORNull.INSTANCE;
+        this.keyComment   = keyComment;
+        this.valueComment = valueComment;
     }
 
 
@@ -73,6 +102,88 @@ public class CBORPair
 
 
     /**
+     * Get the comment for the key.
+     *
+     * <p>
+     * This comment is referenced by the {@link #prettify(String, String)} method.
+     * </p>
+     *
+     * @return
+     *         The comment for the key.
+     *
+     * @since 1.5
+     */
+    public String getKeyComment()
+    {
+        return keyComment;
+    }
+
+
+    /**
+     * Set the comment for the key.
+     *
+     * <p>
+     * This comment is referenced by the {@link #prettify(String, String)} method.
+     * </p>
+     *
+     * @param comment
+     *         The comment for the key.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public CBORPair setKeyComment(String comment)
+    {
+        this.keyComment = comment;
+
+        return this;
+    }
+
+
+    /**
+     * Get the comment for the value.
+     *
+     * <p>
+     * This comment is referenced by the {@link #prettify(String, String)} method.
+     * </p>
+     *
+     * @return
+     *         The comment for the value.
+     *
+     * @since 1.5
+     */
+    public String getValueComment()
+    {
+        return valueComment;
+    }
+
+
+    /**
+     * Set the comment for the value.
+     *
+     * <p>
+     * This comment is referenced by the {@link #prettify(String, String)} method.
+     * </p>
+     *
+     * @param comment
+     *         The comment for the value
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public CBORPair setValueComment(String comment)
+    {
+        this.valueComment = comment;
+
+        return this;
+    }
+
+
+    /**
      * Return {@code "<key>: <value>"}.
      */
     @Override
@@ -85,6 +196,47 @@ public class CBORPair
     private String buildString()
     {
         return String.format("%s: %s", key, value);
+    }
+
+
+    /**
+     * Stringify this CBOR pair.
+     *
+     * <p>
+     * This method is called from the implementation of the
+     * {@link CBORPairList#prettify(String, String) prettify(String, String)}
+     * method of the {@link CBORPairList} class.
+     * </p>
+     *
+     * @param indent
+     *         The indent inherited from the upper CBOR item.
+     *
+     * @param indentUnit
+     *         Additional indent that should be added when nested CBOR items
+     *         are stringified.
+     *
+     * @return
+     *         The string expression of this CBOR pair and all the nested
+     *         CBOR items.
+     *
+     * @since 1.5
+     */
+    public String prettify(String indent, String indentUnit)
+    {
+        // The comment for the key
+        String kComment = (getKeyComment() == null) ? ""
+                : String.format("/ %s / ", getKeyComment());
+
+        // The comment for the value
+        String vComment = (getValueComment() == null) ? ""
+                : String.format(" / %s /", getValueComment());
+
+        return String.format("%s%s: %s%s",
+                kComment,
+                key.  prettify(indent, indentUnit),
+                value.prettify(indent, indentUnit),
+                vComment
+        );
     }
 
 

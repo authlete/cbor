@@ -16,6 +16,10 @@
 package com.authlete.cose.constants;
 
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+
 /**
  * COSE Header Parameters
  *
@@ -135,6 +139,52 @@ public final class COSEHeaderParameters
      * @since 1.2
      */
     public static final int X5CHAIN = 33;
+
+
+    private static final int[] values = {
+            ALG, CRIT, CONTENT_TYPE, KID, IV, PARTIAL_IV, X5CHAIN,
+    };
+
+
+    private static final String[] names = {
+            "alg", "crit", "content type", "kid", "IV", "Partial IV", "x5chain",
+    };
+
+
+    private static final Map<Integer, String> valueToNameMap = createValueToNameMap();
+
+
+    private static Map<Integer, String> createValueToNameMap()
+    {
+        Map<Integer, String> map = new LinkedHashMap<>();
+
+        for (int i = 0; i < values.length; i++)
+        {
+            map.put(values[i], names[i]);
+        }
+
+        return map;
+    }
+
+
+    /**
+     * Get the name of the header parameter to which the integer identifier
+     * has been assigned to.
+     *
+     * @param value
+     *         An integer identifier assigned to a header parameter.
+     *
+     * @return
+     *         The name of the header parameter to which the integer identifier
+     *         has been assigned to. If the given identifier is not recognized,
+     *         {@code null} is returned.
+     *
+     * @since 1.5
+     */
+    public static String getNameByValue(int value)
+    {
+        return valueToNameMap.getOrDefault(value, null);
+    }
 
 
     private COSEHeaderParameters()

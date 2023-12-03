@@ -148,7 +148,7 @@ public class COSEMac0 extends COSEMessage
             return new COSEMac0(
                     (COSEProtectedHeader)common.get(0),
                     (COSEUnprotectedHeader)common.get(1),
-                    buildDecodableByteArrayIfPossible(common.get(2)),
+                    common.get(2),
                     (CBORByteArray)fourth);
         }
         catch (Exception cause)

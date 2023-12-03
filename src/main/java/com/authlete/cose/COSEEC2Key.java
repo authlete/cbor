@@ -66,7 +66,7 @@ public class COSEEC2Key extends COSEKey
      * @param pairs
      *         Key parameters.
      */
-    public COSEEC2Key(List<CBORPair> pairs)
+    public COSEEC2Key(List<? extends CBORPair> pairs)
     {
         super(pairs);
 
@@ -74,7 +74,7 @@ public class COSEEC2Key extends COSEKey
     }
 
 
-    private void validateParameters(List<CBORPair> pairs)
+    private void validateParameters(List<? extends CBORPair> pairs)
     {
         for (CBORPair pair : pairs)
         {

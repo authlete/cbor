@@ -18,6 +18,8 @@ package com.authlete.cose;
 
 import java.nio.charset.StandardCharsets;
 import com.authlete.cbor.CBORByteArray;
+import com.authlete.cbor.CBORItem;
+import com.authlete.cbor.CBORNull;
 
 
 /**
@@ -54,7 +56,7 @@ public class SigStructureBuilder
     private COSEProtectedHeader bodyAttributes;
     private COSEProtectedHeader signerAttributes;
     private CBORByteArray externalData;
-    private CBORByteArray payload;
+    private CBORItem payload;
 
 
     /**
@@ -208,6 +210,25 @@ public class SigStructureBuilder
 
 
     /**
+     * Set the payload to {@code Sig_structure.payload}.
+     *
+     * @param payload
+     *         The payload to be signed.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public SigStructureBuilder payload(CBORItem payload)
+    {
+        this.payload = payload;
+
+        return this;
+    }
+
+
+    /**
      * Set some fields of {@code Sig_structure} based on the given
      * {@link COSESign} object that represents {@code COSE_Sign}
      * which is defined in <a href=
@@ -224,8 +245,8 @@ public class SigStructureBuilder
      * <li>Set {@code sign.}{@link COSESign#getProtectedHeader()
      *     getProtectedeHeader()} to {@code Sig_structure.body_protected}.
      * <li>Set {@code sign.}{@link COSESign#getPayload() getPayload()}
-     *     to {@code Sig_sructure.payload} if the payload holds a
-     *     {@link CBORByteArray} instance.
+     *     to {@code Sig_sructure.payload} if the payload is not null
+     *     and not a {@link CBORNull} instance.
      * </ol>
      *
      * @param sign
@@ -245,10 +266,12 @@ public class SigStructureBuilder
         // Body attributes
         bodyAttributes(sign.getProtectedHeader());
 
-        if (sign.getPayload() instanceof CBORByteArray)
+        // Payload
+        CBORItem payload = sign.getPayload();
+
+        if (payload != null && !(payload instanceof CBORNull))
         {
-            // Payload
-            payload((CBORByteArray)sign.getPayload());
+            payload(payload);
         }
 
         return this;
@@ -300,8 +323,8 @@ public class SigStructureBuilder
      * <li>Set {@code sign1.}{@link COSESign1#getProtectedHeader()
      *     getProtectedeHeader()} to {@code Sig_structure.body_protected}.
      * <li>Set {@code sign1.}{@link COSESign1#getPayload() getPayload()}
-     *     to {@code Sig_sructure.payload} if the payload holds a
-     *     {@link CBORByteArray} instance.
+     *     to {@code Sig_sructure.payload} if the payload is not null
+     *     and not a {@link CBORNull} instance.
      * </ol>
      *
      * @param sign1
@@ -321,10 +344,12 @@ public class SigStructureBuilder
         // Body attributes
         bodyAttributes(sign1.getProtectedHeader());
 
-        if (sign1.getPayload() instanceof CBORByteArray)
+        // Payload
+        CBORItem payload = sign1.getPayload();
+
+        if (payload != null && !(payload instanceof CBORNull))
         {
-            // Payload
-            payload((CBORByteArray)sign1.getPayload());
+            payload(payload);
         }
 
         return this;

@@ -57,6 +57,21 @@ public class CBORDecodingTest
     }
 
 
+    private static List<CBORItem> decodeAll(String hex)
+    {
+        try
+        {
+            return new CBORDecoder(fromHex(hex)).all();
+        }
+        catch (IOException e)
+        {
+            // This should not happen.
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
     private static void testBoolean(Boolean expected, String inputHex)
     {
         testBoolean(expected, decode(inputHex));
@@ -221,7 +236,9 @@ public class CBORDecodingTest
 
     private static void testByteArrayToString(String expected, String inputHex, boolean decodable)
     {
-        CBORByteArray ba = new CBORByteArray(fromHex(inputHex), decodable);
+        List<CBORItem> decoded = (decodable ? decodeAll(inputHex) : null);
+
+        CBORByteArray ba = new CBORByteArray(fromHex(inputHex), decoded);
 
         assertEquals(expected, ba.toString());
     }
@@ -830,7 +847,7 @@ public class CBORDecodingTest
         CBORItemList list = testArray("83010203");
 
         // Array size
-        List<CBORItem> items = list.getItems();
+        List<? extends CBORItem> items = list.getItems();
         assertEquals(3, items.size());
 
         testInteger(1, items.get(0));
@@ -849,7 +866,7 @@ public class CBORDecodingTest
         CBORItemList list = testArray("8301820203820405");
 
         // Array size
-        List<CBORItem> items = list.getItems();
+        List<? extends CBORItem> items = list.getItems();
         assertEquals(3, items.size());
 
         // Element 0
@@ -887,7 +904,7 @@ public class CBORDecodingTest
         CBORItemList list = testArray("98190102030405060708090a0b0c0d0e0f101112131415161718181819");
 
         // Array size
-        List<CBORItem> items = list.getItems();
+        List<? extends CBORItem> items = list.getItems();
         assertEquals(25, items.size());
 
         for (int i = 0; i < 25; i++)
@@ -997,7 +1014,7 @@ public class CBORDecodingTest
 
         // Map
         CBORPairList list = testMap("a56161614161626142616361436164614461656145");
-        List<CBORPair> pairs = list.getPairs();
+        List<? extends CBORPair> pairs = list.getPairs();
         assertEquals(5, pairs.size());
 
         String[] keys   = { "a", "b", "c", "d", "e" };
@@ -1053,7 +1070,7 @@ public class CBORDecodingTest
         CBORItemList list = testArray("9f018202039f0405ffff");
 
         // Array size
-        List<CBORItem> items = list.getItems();
+        List<? extends CBORItem> items = list.getItems();
         assertEquals(3, items.size());
 
         // Element 0
@@ -1091,7 +1108,7 @@ public class CBORDecodingTest
         CBORItemList list = testArray("9f01820203820405ff");
 
         // Array size
-        List<CBORItem> items = list.getItems();
+        List<? extends CBORItem> items = list.getItems();
         assertEquals(3, items.size());
 
         // Element 0
@@ -1129,7 +1146,7 @@ public class CBORDecodingTest
         CBORItemList list = testArray("83018202039f0405ff");
 
         // Array size
-        List<CBORItem> items = list.getItems();
+        List<? extends CBORItem> items = list.getItems();
         assertEquals(3, items.size());
 
         // Element 0
@@ -1167,7 +1184,7 @@ public class CBORDecodingTest
         CBORItemList list = testArray("83019f0203ff820405");
 
         // Array size
-        List<CBORItem> items = list.getItems();
+        List<? extends CBORItem> items = list.getItems();
         assertEquals(3, items.size());
 
         // Element 0
@@ -1205,7 +1222,7 @@ public class CBORDecodingTest
         CBORItemList list = testArray("9f0102030405060708090a0b0c0d0e0f101112131415161718181819ff");
 
         // Array size
-        List<CBORItem> items = list.getItems();
+        List<? extends CBORItem> items = list.getItems();
         assertEquals(25, items.size());
 
         for (int i = 0; i < 25; i++)
@@ -1277,7 +1294,7 @@ public class CBORDecodingTest
 
         // Map
         CBORPairList list = testMap("bf6346756ef563416d7421ff");
-        List<CBORPair> pairs = list.getPairs();
+        List<? extends CBORPair> pairs = list.getPairs();
 
         assertEquals(2, pairs.size());
 

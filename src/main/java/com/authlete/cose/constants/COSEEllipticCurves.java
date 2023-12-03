@@ -123,6 +123,62 @@ public final class COSEEllipticCurves
     /** secp256k1 (8) */
     public static final int SECP256K1 = 8;
 
+    /**
+     * "P-256"
+     *
+     * @since 1.5
+     */
+    public static final String P_256_NAME = "P-256";
+
+    /**
+     * "P-384"
+     *
+     * @since 1.5
+     */
+    public static final String P_384_NAME = "P-384";
+
+    /**
+     * "P-521"
+     *
+     * @since 1.5
+     */
+    public static final String P_521_NAME = "P-521";
+
+    /**
+     * "X25519"
+     *
+     * @since 1.5
+     */
+    public static final String X25519_NAME = "X25519";
+
+    /**
+     * "X448"
+     *
+     * @since 1.5
+     */
+    public static final String X448_NAME = "X448";
+
+    /**
+     * "Ed25519"
+     *
+     * @since 1.5
+     */
+    public static final String Ed25519_NAME = "Ed25519";
+
+    /**
+     * "Ed448"
+     *
+     * @since 1.5
+     */
+    public static final String Ed448_NAME = "Ed448";
+
+    /**
+     * "secp256k1"
+     *
+     * @since 1.5
+     */
+    public static final String SECP256K1_NAME = "secp256k1";
+
 
     private static final int[] values = {
             P_256, P_384, P_521, X25519, X448, Ed25519, Ed448, SECP256K1,
@@ -130,7 +186,8 @@ public final class COSEEllipticCurves
 
 
     private static final String[] names = {
-            "P-256", "P-384", "P-521", "X25519", "X448", "Ed25519", "Ed448", "secp256k1",
+            P_256_NAME, P_384_NAME, P_521_NAME,
+            X25519_NAME, X448_NAME, Ed25519_NAME, Ed448_NAME, SECP256K1_NAME
     };
 
 

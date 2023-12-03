@@ -18,6 +18,7 @@ package com.authlete.cose;
 
 import java.util.List;
 import com.authlete.cbor.CBORByteArray;
+import com.authlete.cbor.CBORItem;
 import com.authlete.cbor.CBORItemList;
 import com.authlete.cbor.CBORString;
 
@@ -63,6 +64,14 @@ public class SigStructure extends CBORItemList
      * This constructor is for {@code COSE_Sign}.
      * </p>
      *
+     * <p>
+     * The type of the {@code payload} argument has been changed from
+     * {@link CBORByteArray} to {@link CBORItem} since version 1.5. This is
+     * because the <a href="https://www.iso.org/standard/69084.html">ISO/IEC
+     * 18013-5:2021</a> standard requires that the payload start with a tag
+     * instead of a byte string.
+     * </p>
+     *
      * @param bodyAttributes
      *         The protected header of the content. Must not be null.
      *
@@ -78,7 +87,7 @@ public class SigStructure extends CBORItemList
     public SigStructure(
             COSEProtectedHeader bodyAttributes,
             COSEProtectedHeader signerAttributes,
-            CBORByteArray externalData, CBORByteArray payload)
+            CBORByteArray externalData, CBORItem payload)
     {
         super(List.of(CONTEXT_SIGNATURE, bodyAttributes, signerAttributes, externalData, payload));
 
@@ -97,6 +106,14 @@ public class SigStructure extends CBORItemList
      * This constructor is for {@code COSE_Sign1}.
      * </p>
      *
+     * <p>
+     * The type of the {@code payload} argument has been changed from
+     * {@link CBORByteArray} to {@link CBORItem} since version 1.5. This is
+     * because the <a href="https://www.iso.org/standard/69084.html">ISO/IEC
+     * 18013-5:2021</a> standard requires that the payload start with a tag
+     * instead of a byte string.
+     * </p>
+     *
      * @param bodyAttributes
      *         The protected header of the content. Must not be null.
      *
@@ -108,7 +125,7 @@ public class SigStructure extends CBORItemList
      */
     public SigStructure(
             COSEProtectedHeader bodyAttributes,
-            CBORByteArray externalData, CBORByteArray payload)
+            CBORByteArray externalData, CBORItem payload)
     {
         super(List.of(CONTEXT_SIGNATURE1, bodyAttributes, externalData, payload));
 
@@ -201,15 +218,15 @@ public class SigStructure extends CBORItemList
      * @return
      *         The payload.
      */
-    public CBORByteArray getPayload()
+    public CBORItem getPayload()
     {
         if (isSignature())
         {
-            return (CBORByteArray)getItems().get(4);
+            return getItems().get(4);
         }
         else
         {
-            return (CBORByteArray)getItems().get(3);
+            return getItems().get(3);
         }
     }
 

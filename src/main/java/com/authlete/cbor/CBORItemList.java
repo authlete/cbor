@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  */
 public class CBORItemList extends CBORItem
 {
-    private final List<CBORItem> items;
+    private final List<? extends CBORItem> items;
 
 
     /**
@@ -40,7 +40,7 @@ public class CBORItemList extends CBORItem
      * @param items
      *         A list of CBOR data items.
      */
-    public CBORItemList(List<CBORItem> items)
+    public CBORItemList(List<? extends CBORItem> items)
     {
         this.items = items;
     }
@@ -52,7 +52,7 @@ public class CBORItemList extends CBORItem
      * @return
      *         The CBOR data items.
      */
-    public List<CBORItem> getItems()
+    public List<? extends CBORItem> getItems()
     {
         return items;
     }
@@ -77,6 +77,31 @@ public class CBORItemList extends CBORItem
 
         return items.stream().map(CBORItem::toString)
                 .collect(Collectors.joining(", ", "[", "]"));
+    }
+
+
+    @Override
+    protected String prettify(String indent, String indentUnit)
+    {
+        // The comment attached to this CBOR item.
+        String comment = (getComment() == null) ? ""
+                : String.format("/ %s / ", getComment());
+
+        if (items == null || items.size() == 0)
+        {
+            return String.format("%s[%n%s]", comment, indent);
+        }
+
+        String delimiter = String.format(",%n");
+        String prefix    = String.format("%s[%n", comment);
+        String suffix    = String.format("%n%s]", indent);
+
+        // The indent for each item.
+        final String subIndent = indent + indentUnit;
+
+        return items.stream()
+                .map(item -> String.format("%s%s", subIndent, item.prettify(subIndent, indentUnit)))
+                .collect(Collectors.joining(delimiter, prefix, suffix));
     }
 
 

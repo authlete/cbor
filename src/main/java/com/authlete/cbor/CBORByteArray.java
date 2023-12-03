@@ -36,15 +36,9 @@ import java.util.stream.Collectors;
 public class CBORByteArray extends CBORValue<byte[]>
 {
     /**
-     * Decoder options without tag processors.
+     * Decoded content.
      */
-    private static final CBORDecoderOptions DECODER_OPTIONS = new CBORDecoderOptions();
-
-
-    /**
-     * Whether the value can be decoded as a CBOR data item.
-     */
-    private final boolean decodable;
+    private final List<? extends CBORItem> decodedContent;
 
 
     /**
@@ -55,35 +49,66 @@ public class CBORByteArray extends CBORValue<byte[]>
      */
     public CBORByteArray(byte[] value)
     {
-        this(value, false);
+        this(value, /* decodedContent */ (CBORItem)null);
     }
 
 
     /**
-     * A constructor with the value and a flag indicating whether the value
-     * can be decoded as a CBOR data item or not.
+     * A constructor with the value and the CBOR item represented by
+     * the byte array.
      *
      * @param value
      *         The value of this byte string. Must not be null.
      *
-     * @param decodable
-     *         {@code true} to indicate that the value can be decoded as a
-     *         CBOR data item.
+     * @param decodedContent
+     *         The CBOR item represented by the byte array.
      *
-     * @since 1.1
+     * @since 1.5
      */
-    public CBORByteArray(byte[] value, boolean decodable)
+    public CBORByteArray(byte[] value, CBORItem decodedContent)
+    {
+        this(value, (decodedContent != null) ? List.of(decodedContent) : null);
+    }
+
+
+    /**
+     * A constructor with the value and the list of CBOR items represented by
+     * the byte array.
+     *
+     * @param value
+     *         The value of this byte string. Must not be null.
+     *
+     * @param decodedContent
+     *         The CBOR item represented by the byte array.
+     *
+     * @since 1.5
+     */
+    public CBORByteArray(byte[] value, List<? extends CBORItem> decodedContent)
     {
         super(value);
 
-        this.decodable = decodable;
+        this.decodedContent = decodedContent;
+    }
+
+
+    /**
+     * Get the list of CBOR items represented by this byte string.
+     *
+     * @return
+     *         The list of CBOR items represented by this byte string.
+     *
+     * @since 1.5
+     */
+    public List<? extends CBORItem> getDecodedContent()
+    {
+        return decodedContent;
     }
 
 
     /**
      * Return <code>h'<i>{base64}</i>'</code>, or
-     * {@code <<}<i>{CBOR data item}</i>{@code >>} if the value can be
-     * decoded as a CBOR data item.
+     * {@code <<}<i>{CBOR data item(s)}</i>{@code >>} if the value can be
+     * decoded as a CBOR data item or CBOR data items.
      *
      * @see <a href="https://www.rfc-editor.org/rfc/rfc8949#name-diagnostic-notation"
      *      >RFC 8949, 8. Diagnostic Notation</a>
@@ -91,7 +116,7 @@ public class CBORByteArray extends CBORValue<byte[]>
     @Override
     public String toString()
     {
-        return toString(decodable);
+        return toString(decodedContent != null);
     }
 
 
@@ -99,7 +124,7 @@ public class CBORByteArray extends CBORValue<byte[]>
      * Get the string representation of this byte string.
      *
      * @param decode
-     *         {@code true} to try to decode the content as a CBOR data item.
+     *         {@code true} to try to decode the content as CBOR data item(s).
      *         {@code false} to try not to decode the content.
      *
      * @return
@@ -124,19 +149,15 @@ public class CBORByteArray extends CBORValue<byte[]>
 
     private String buildDecodedString()
     {
-        try
+        if (decodedContent != null)
         {
-            // Decode the content of this byte string as a list of CBOR data items.
-            List<CBORItem> items = decodeValue();
-
             // Return the representation of the content enclosed with "<<" and ">>".
-            return items.stream().map(CBORItem::toString)
+            return decodedContent.stream().map(CBORItem::toString)
                     .collect(Collectors.joining(", ", "<<", ">>"));
         }
-        catch (CBORDecoderException cause)
+        else
         {
-            // The content of this byte string failed to be decoded as
-            // a CBOR data item. Return the hex representation.
+            // Return the hex representation.
             return buildString();
         }
     }
@@ -164,6 +185,53 @@ public class CBORByteArray extends CBORValue<byte[]>
 
 
     @Override
+    protected String prettify(String indent, String indentUnit)
+    {
+        // The comment attached to this CBOR item.
+        String comment = (getComment() == null) ? ""
+                : String.format("/ %s / ", getComment());
+
+        if (decodedContent != null)
+        {
+            return prettifyDecodedString(
+                    decodedContent, indent, indentUnit, comment);
+        }
+        else
+        {
+            return prettifyString(comment);
+        }
+    }
+
+
+    private String prettifyDecodedString(
+            List<? extends CBORItem> items,
+            String indent, String indentUnit, String comment)
+    {
+        if (items == null || items.size() == 0)
+        {
+            return String.format("%s<<%n%s>>", comment, indent);
+        }
+
+        String delimiter = String.format(",%n");
+        String prefix    = String.format("%s<<%n", comment);
+        String suffix    = String.format("%n%s>>", indent);
+
+        // The indent for each item.
+        final String subIndent = indent + indentUnit;
+
+        return items.stream()
+                .map(item -> String.format("%s%s", subIndent, item.prettify(subIndent, indentUnit)))
+                .collect(Collectors.joining(delimiter, prefix, suffix));
+    }
+
+
+    private String prettifyString(String comment)
+    {
+        return String.format("%s%s", comment, toString());
+    }
+
+
+    @Override
     public void encode(OutputStream outputStream) throws IOException
     {
         byte[] value = getValue();
@@ -171,50 +239,5 @@ public class CBORByteArray extends CBORValue<byte[]>
         encodeMajorWithNumber(outputStream, 2 /* major */, value.length);
 
         outputStream.write(value);
-    }
-
-
-    /**
-     * Decode the content of this byte string as a CBOR data item.
-     *
-     * @return
-     *         A list of CBOR data items. If the value of this byte string is
-     *         null or an empty byte array, an empty list is returned.
-     *
-     * @throws CBORDecoderException
-     *         The content failed to be parsed as a CBOR data item.
-     *
-     * @since 1.1
-     */
-    public List<CBORItem> decodeValue() throws CBORDecoderException
-    {
-        // The content of this byte string.
-        byte[] value = getValue();
-
-        if (value == null || value.length == 0)
-        {
-            return List.of();
-        }
-
-        // Create a decoder without tag processors.
-        CBORDecoder decoder = new CBORDecoder(value, DECODER_OPTIONS);
-
-        try
-        {
-            // Read all the CBOR data items.
-            return decoder.all();
-        }
-        catch (CBORDecoderException cause)
-        {
-            // The content failed to be decoded as a CBOR data item.
-            throw cause;
-        }
-        catch (IOException cause)
-        {
-            // The next() method of CBORDecoder does not throw IOException
-            // when the instance was created with a byte array (not with
-            // an input stream).
-            throw new CBORDecoderException(cause);
-        }
     }
 }

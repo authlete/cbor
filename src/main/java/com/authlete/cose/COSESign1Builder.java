@@ -108,6 +108,25 @@ public class COSESign1Builder
      * Set a payload.
      *
      * @param payload
+     *         A payload.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.5
+     */
+    public COSESign1Builder payload(CBORItem payload)
+    {
+        this.payload = payload;
+
+        return this;
+    }
+
+
+    /**
+     * Set a payload.
+     *
+     * @param payload
      *         A payload. Its UTF-8 byte sequence is used.
      *
      * @return
@@ -150,6 +169,11 @@ public class COSESign1Builder
     public COSESign1Builder signature(byte[] signature)
     {
         CBORByteArray ba = (signature != null) ? new CBORByteArray(signature) : null;
+
+        if (ba != null)
+        {
+            ba.setComment("signature");
+        }
 
         return signature(ba);
     }

@@ -107,6 +107,19 @@ public class CBORTaggedItem extends CBORItem
 
 
     @Override
+    protected String prettify(String indent, String indentUnit)
+    {
+        String comment = (getComment() == null) ? ""
+                : String.format("/ %s / ", getComment());
+
+        return String.format("%s%s(%s)",
+                comment,
+                tagNumber.toString(),
+                tagContent.prettify(indent, indentUnit));
+    }
+
+
+    @Override
     public void encode(OutputStream outputStream) throws IOException
     {
         encodeMajorWithNumber(outputStream, 6 /* major */, tagNumber);

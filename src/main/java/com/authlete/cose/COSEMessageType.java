@@ -30,41 +30,43 @@ public enum COSEMessageType
     /**
      * COSE Signed Data Object; Tag = 98
      */
-    COSE_SIGN(98),
+    COSE_SIGN(98, "COSE_Sign"),
 
     /**
      * COSE Single Signer Data Object; Tag = 18
      */
-    COSE_SIGN1(18),
+    COSE_SIGN1(18, "COSE_Sign1"),
 
     /**
      * COSE Encrypted Data Object; Tag = 96
      */
-    COSE_ENCRYPT(96),
+    COSE_ENCRYPT(96, "COSE_Encrypt"),
 
     /**
      * COSE Single Recipient Encrypted Data Object; Tag = 16
      */
-    COSE_ENCRYPT0(16),
+    COSE_ENCRYPT0(16, "COSE_Encrypt0"),
 
     /**
      * COSE MACed Data Object; Tag = 97
      */
-    COSE_MAC(97),
+    COSE_MAC(97, "COSE_Mac"),
 
     /**
      * COSE Mac w/o Recipients Object; Tag = 17
      */
-    COSE_MAC0(17),
+    COSE_MAC0(17, "COSE_Mac0"),
     ;
 
 
     private final int tagNumber;
+    private final String name;
 
 
-    private COSEMessageType(int tagNumber)
+    private COSEMessageType(int tagNumber, String name)
     {
         this.tagNumber = tagNumber;
+        this.name      = name;
     }
 
 
@@ -77,5 +79,19 @@ public enum COSEMessageType
     public int getTagNumber()
     {
         return tagNumber;
+    }
+
+
+    /**
+     * Get the name of this COSE message.
+     *
+     * @return
+     *         The name such as {@code "COSE_Sign1"}.
+     *
+     * @since 1.5
+     */
+    public String getName()
+    {
+        return name;
     }
 }
