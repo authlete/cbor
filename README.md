@@ -1565,7 +1565,7 @@ with a special prefix (e.g. `"cbor:"`), and convert them into CBOR-specific
 data. As a result, input data like below will be accepted and CBOR-specific
 data will be embedded accordingly.
 
-```java
+```json
 {
     "com.example.namespace3": {
         "birth_date": "cbor:1004(\"1974-05-06\")",
