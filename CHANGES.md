@@ -1,6 +1,29 @@
 CHANGES
 =======
 
+Introduce a mechanism to support CBOR tags of "Content Hints" (RFC 8949 Section 3.4.5).
+
+- `CBORByteArray` class
+  * Add the `prettify(String, String, Number)` method.
+  * Remove the `prettify(String, String)` method.
+
+- `CBORItem` class
+  * Add the `prettify(String, String, Number)` method.
+  * Remove the `prettify(String, String)` method.
+
+- `CBORItemList` class
+  * Add the `prettify(String, String, Number)` method.
+  * Remove the `prettify(String, String)` method.
+
+- `CBORPairList` class
+  * Add the `prettify(String, String, Number)` method.
+  * Remove the `prettify(String, String)` method.
+
+- `CBORTaggedItem` class
+  * Add the `prettify(String, String, Number)` method.
+  * Remove the `prettify(String, String)` method.
+
+
 1.6 (2023-12-03)
 ----------------
 

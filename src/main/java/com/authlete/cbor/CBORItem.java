@@ -184,7 +184,7 @@ public abstract class CBORItem
      */
     public String prettify()
     {
-        return prettify("", "  ");
+        return prettify("", "  ", null);
     }
 
 
@@ -203,13 +203,17 @@ public abstract class CBORItem
      *         Additional indent that should be added when nested CBOR items
      *         are stringified.
      *
+     * @param tagNumber
+     *         The tag number of the tag wrapping this CBOR item. If this CBOR
+     *         item is not wrapped, {@code null} is passed.
+     *
      * @return
      *         The string expression of this CBOR item and all the nested
      *         CBOR items.
      *
-     * @since 1.5
+     * @since 1.7
      */
-    protected String prettify(String indent, String indentUnit)
+    protected String prettify(String indent, String indentUnit, Number tagNumber)
     {
         String comment = getComment();
         String content = toString();

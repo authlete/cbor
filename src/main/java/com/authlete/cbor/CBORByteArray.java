@@ -36,6 +36,35 @@ import java.util.stream.Collectors;
 public class CBORByteArray extends CBORValue<byte[]>
 {
     /**
+     * Tag 24; Encoded CBOR data item.
+     *
+     * <p>
+     * From <a href="https://www.rfc-editor.org/rfc/rfc8949#section-3.4.5.1"
+     * >RFC 8949, 3.4.5.1. Encoded CBOR Data Item</a>:
+     * </p>
+     *
+     * <p><i>
+     * Sometimes it is beneficial to carry an embedded CBOR data item that is
+     * not meant to be decoded immediately at the time the enclosing data item
+     * is being decoded. Tag number 24 (CBOR data item) can be used to tag the
+     * embedded byte string as a single data item encoded in CBOR format.
+     * Contained items that aren't byte strings are invalid. A contained byte
+     * string is valid if it encodes a well-formed CBOR data item; validity
+     * checking of the decoded CBOR item is not required for tag validity (but
+     * could be offered by a generic decoder as a special option).
+     * </i></p>
+     * </blockquote>
+     */
+    private static final Integer TAG_ENCODED_CBOR_DATA_ITEM = Integer.valueOf(24);
+
+
+    /**
+     * Decoder options without tag processors.
+     */
+    private static final CBORDecoderOptions DECODER_OPTIONS = new CBORDecoderOptions();
+
+
+    /**
      * Decoded content.
      */
     private final List<? extends CBORItem> decodedContent;
@@ -185,16 +214,15 @@ public class CBORByteArray extends CBORValue<byte[]>
 
 
     @Override
-    protected String prettify(String indent, String indentUnit)
+    protected String prettify(String indent, String indentUnit, Number tagNumber)
     {
         // The comment attached to this CBOR item.
         String comment = (getComment() == null) ? ""
                 : String.format("/ %s / ", getComment());
 
-        if (decodedContent != null)
+        if (TAG_ENCODED_CBOR_DATA_ITEM.equals(tagNumber) || decodedContent != null)
         {
-            return prettifyDecodedString(
-                    decodedContent, indent, indentUnit, comment);
+            return prettifyDecodedString(indent, indentUnit, comment);
         }
         else
         {
@@ -204,9 +232,16 @@ public class CBORByteArray extends CBORValue<byte[]>
 
 
     private String prettifyDecodedString(
-            List<? extends CBORItem> items,
             String indent, String indentUnit, String comment)
     {
+        List<? extends CBORItem> items = prepareDecodedContent();
+
+        // If decoding the value as CBOR data failed.
+        if (items == null && getValue() != null)
+        {
+            return prettifyString(comment);
+        }
+
         if (items == null || items.size() == 0)
         {
             return String.format("%s<<%n%s>>", comment, indent);
@@ -220,8 +255,34 @@ public class CBORByteArray extends CBORValue<byte[]>
         final String subIndent = indent + indentUnit;
 
         return items.stream()
-                .map(item -> String.format("%s%s", subIndent, item.prettify(subIndent, indentUnit)))
+                .map(item -> String.format("%s%s", subIndent,
+                        item.prettify(subIndent, indentUnit, null)))
                 .collect(Collectors.joining(delimiter, prefix, suffix));
+    }
+
+
+    private List<? extends CBORItem> prepareDecodedContent()
+    {
+        if (decodedContent != null)
+        {
+            return decodedContent;
+        }
+
+        if (getValue() == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            // Try to decode the value of this byte string as CBOR data.
+            return new CBORDecoder(getValue(), DECODER_OPTIONS).all();
+        }
+        catch (IOException cause)
+        {
+            // Failed to decode the value of this byte string as CBOR data.
+            return null;
+        }
     }
 
 

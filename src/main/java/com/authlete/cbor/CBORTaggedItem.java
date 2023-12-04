@@ -107,7 +107,7 @@ public class CBORTaggedItem extends CBORItem
 
 
     @Override
-    protected String prettify(String indent, String indentUnit)
+    protected String prettify(String indent, String indentUnit, Number upperTagNumber)
     {
         String comment = (getComment() == null) ? ""
                 : String.format("/ %s / ", getComment());
@@ -115,7 +115,7 @@ public class CBORTaggedItem extends CBORItem
         return String.format("%s%s(%s)",
                 comment,
                 tagNumber.toString(),
-                tagContent.prettify(indent, indentUnit));
+                tagContent.prettify(indent, indentUnit, tagNumber));
     }
 
 

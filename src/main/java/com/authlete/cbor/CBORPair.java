@@ -233,8 +233,8 @@ public class CBORPair
 
         return String.format("%s%s: %s%s",
                 kComment,
-                key.  prettify(indent, indentUnit),
-                value.prettify(indent, indentUnit),
+                key.  prettify(indent, indentUnit, null),
+                value.prettify(indent, indentUnit, null),
                 vComment
         );
     }

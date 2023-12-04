@@ -81,7 +81,7 @@ public class CBORItemList extends CBORItem
 
 
     @Override
-    protected String prettify(String indent, String indentUnit)
+    protected String prettify(String indent, String indentUnit, Number tagNumber)
     {
         // The comment attached to this CBOR item.
         String comment = (getComment() == null) ? ""
@@ -100,7 +100,8 @@ public class CBORItemList extends CBORItem
         final String subIndent = indent + indentUnit;
 
         return items.stream()
-                .map(item -> String.format("%s%s", subIndent, item.prettify(subIndent, indentUnit)))
+                .map(item -> String.format("%s%s",
+                        subIndent, item.prettify(subIndent, indentUnit, null)))
                 .collect(Collectors.joining(delimiter, prefix, suffix));
     }
 
