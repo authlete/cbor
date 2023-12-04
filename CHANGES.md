@@ -1,6 +1,9 @@
 CHANGES
 =======
 
+1.7 (2023-12-05)
+----------------
+
 Introduce a mechanism to support CBOR tags of "Content Hints" (RFC 8949 Section 3.4.5).
 
 - `CBORByteArray` class
