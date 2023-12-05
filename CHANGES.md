@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+1.10 (2023-12-05)
+-----------------
+
+- `CBORByteArray` class
+  * Bugfix of `toString` and `prettify`.
+
 1.9 (2023-12-05)
 ----------------
 
