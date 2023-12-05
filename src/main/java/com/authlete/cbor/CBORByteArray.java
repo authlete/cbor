@@ -55,7 +55,7 @@ public class CBORByteArray extends CBORValue<byte[]>
      * </i></p>
      * </blockquote>
      */
-    private static final Integer TAG_ENCODED_CBOR_DATA_ITEM = Integer.valueOf(24);
+    private static final int TAG_ENCODED_CBOR_DATA_ITEM = 24;
 
 
     /**
@@ -152,7 +152,9 @@ public class CBORByteArray extends CBORValue<byte[]>
     @Override
     protected String toString(Number tagNumber)
     {
-        if (TAG_ENCODED_CBOR_DATA_ITEM.equals(tagNumber))
+        int tagInt = tagNumber.intValue();
+
+        if (tagInt == TAG_ENCODED_CBOR_DATA_ITEM)
         {
             return toString(true);
         }
@@ -236,7 +238,9 @@ public class CBORByteArray extends CBORValue<byte[]>
         String comment = (getComment() == null) ? ""
                 : String.format("/ %s / ", getComment());
 
-        if (TAG_ENCODED_CBOR_DATA_ITEM.equals(tagNumber) || decodedContent != null)
+        int tagInt = tagNumber.intValue();
+
+        if (tagInt == TAG_ENCODED_CBOR_DATA_ITEM || decodedContent != null)
         {
             return prettifyDecodedString(indent, indentUnit, comment);
         }

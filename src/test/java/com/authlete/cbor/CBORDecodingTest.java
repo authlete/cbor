@@ -18,6 +18,7 @@ package com.authlete.cbor;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -1586,5 +1587,24 @@ public class CBORDecodingTest
         String actual   = item.toString();
 
         assertEquals(expected, actual);
+    }
+
+
+    @Test
+    public void test_tag_to_string()
+    {
+        String hex = "d8184101"; // 24(<<1>>)
+        CBORItem item = decode(hex);
+
+        assertTrue(item instanceof CBORTaggedItem);
+
+        CBORTaggedItem taggedItem = (CBORTaggedItem)item;
+        assertEquals(24, taggedItem.getTagNumber().intValue());
+
+        CBORItem tagContent = taggedItem.getTagContent();
+        assertTrue(tagContent instanceof CBORByteArray);
+
+        assertEquals("24(<<1>>)", item.toString());
+        assertEquals(String.format("24(<<%n  1%n>>)"), item.prettify());
     }
 }
