@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+1.9 (2023-12-05)
+----------------
+
+- `CBORByteArray` class
+  * Bugfix of tag number comparison.
+
 1.8 (2023-12-05)
 ----------------
 
