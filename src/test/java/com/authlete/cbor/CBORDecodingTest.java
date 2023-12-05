@@ -18,6 +18,7 @@ package com.authlete.cbor;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import org.apache.commons.codec.DecoderException;
@@ -1512,5 +1513,78 @@ public class CBORDecodingTest
     public void test_double_nan()
     {
         testDouble(Double.NaN, CBORDouble.NaN);
+    }
+
+
+    @Test
+    public void test_rfc8610_appendixG_3_1_with_tag_24()
+    {
+        // 1
+        CBORInteger nestedItem = new CBORInteger(1);
+
+        // <<1>>
+        CBORByteArray tagContent = new CBORByteArray(nestedItem.encode());
+
+        // 24(<<1>>)
+        CBORItem item = new CBORTaggedItem(24, tagContent);
+
+        String expected = "24(<<1>>)";
+        String actual   = item.toString();
+
+        assertEquals(expected, actual);
+    }
+
+
+    @Test
+    public void test_rfc8610_appendixG_3_2_with_tag_24() throws IOException
+    {
+        // <<1, 2>>
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(new CBORInteger(1).encode());
+        out.write(new CBORInteger(2).encode());
+        CBORItem tagContent = new CBORByteArray(out.toByteArray());
+
+        // 24(<<1, 2>>)
+        CBORItem item = new CBORTaggedItem(24, tagContent);
+
+        String expected = "24(<<1, 2>>)";
+        String actual   = item.toString();
+
+        assertEquals(expected, actual);
+    }
+
+
+    @Test
+    public void test_rfc8610_appendixG_3_3_with_tag_24() throws IOException
+    {
+        // <<"foo", null>>
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(new CBORString("foo").encode());
+        out.write(CBORNull.INSTANCE.encode());
+        CBORItem tagContent = new CBORByteArray(out.toByteArray());
+
+        // 24(<<"foo", null>>)
+        CBORItem item = new CBORTaggedItem(24, tagContent);
+
+        String expected = "24(<<\"foo\", null>>)";
+        String actual   = item.toString();
+
+        assertEquals(expected, actual);
+    }
+
+
+    @Test
+    public void test_rfc8610_appendixG_3_4_with_tag_24()
+    {
+        // <<>>
+        CBORItem tagContent = new CBORByteArray(new byte[] {});
+
+        // 24(<<>>)
+        CBORItem item = new CBORTaggedItem(24, tagContent);
+
+        String expected = "24(<<>>)";
+        String actual   = item.toString();
+
+        assertEquals(expected, actual);
     }
 }

@@ -173,6 +173,29 @@ public abstract class CBORItem
 
 
     /**
+     * Get the string representation of this CBOR item. The default
+     * implementation of this method calls the {@code toString()} method.
+     *
+     * <p>
+     * This method is called by the implementation of the
+     * {@link CBORTaggedItem} class.
+     * </p>
+     *
+     * @param tagNumber
+     *         The tag number prepended to this CBOR item.
+     *
+     * @return
+     *         The string representation of this CBOR item.
+     *
+     * @since 1.8
+     */
+    protected String toString(Number tagNumber)
+    {
+        return toString();
+    }
+
+
+    /**
      * Stringify this CBOR item and all the nested CBOR items in the pretty
      * format.
      *

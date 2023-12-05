@@ -149,6 +149,20 @@ public class CBORByteArray extends CBORValue<byte[]>
     }
 
 
+    @Override
+    protected String toString(Number tagNumber)
+    {
+        if (TAG_ENCODED_CBOR_DATA_ITEM.equals(tagNumber))
+        {
+            return toString(true);
+        }
+        else
+        {
+            return toString(false);
+        }
+    }
+
+
     /**
      * Get the string representation of this byte string.
      *
@@ -178,10 +192,12 @@ public class CBORByteArray extends CBORValue<byte[]>
 
     private String buildDecodedString()
     {
-        if (decodedContent != null)
+        List<? extends CBORItem> items = prepareDecodedContent();
+
+        if (items != null)
         {
             // Return the representation of the content enclosed with "<<" and ">>".
-            return decodedContent.stream().map(CBORItem::toString)
+            return items.stream().map(CBORItem::toString)
                     .collect(Collectors.joining(", ", "<<", ">>"));
         }
         else

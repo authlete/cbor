@@ -102,7 +102,8 @@ public class CBORTaggedItem extends CBORItem
 
     private String buildString()
     {
-        return String.format("%s(%s)", tagNumber.toString(), tagContent.toString());
+        return String.format("%s(%s)",
+                tagNumber.toString(), tagContent.toString(tagNumber));
     }
 
 
