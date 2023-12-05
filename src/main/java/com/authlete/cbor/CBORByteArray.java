@@ -152,9 +152,7 @@ public class CBORByteArray extends CBORValue<byte[]>
     @Override
     protected String toString(Number tagNumber)
     {
-        int tagInt = tagNumber.intValue();
-
-        if (tagInt == TAG_ENCODED_CBOR_DATA_ITEM)
+        if (isEncodedCborDataItem(tagNumber))
         {
             return toString(true);
         }
@@ -162,6 +160,17 @@ public class CBORByteArray extends CBORValue<byte[]>
         {
             return toString(false);
         }
+    }
+
+
+    private static boolean isEncodedCborDataItem(Number tagNumber)
+    {
+        if (tagNumber == null)
+        {
+            return false;
+        }
+
+        return tagNumber.intValue() == TAG_ENCODED_CBOR_DATA_ITEM;
     }
 
 
@@ -238,9 +247,7 @@ public class CBORByteArray extends CBORValue<byte[]>
         String comment = (getComment() == null) ? ""
                 : String.format("/ %s / ", getComment());
 
-        int tagInt = tagNumber.intValue();
-
-        if (tagInt == TAG_ENCODED_CBOR_DATA_ITEM || decodedContent != null)
+        if (isEncodedCborDataItem(tagNumber) || decodedContent != null)
         {
             return prettifyDecodedString(indent, indentUnit, comment);
         }
