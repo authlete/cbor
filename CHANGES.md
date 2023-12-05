@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+1.8 (2023-12-05)
+----------------
+
+- `CBORItem` class
+  * Add the `toString(Number)` method.
+
+- `CBORByteArray` class
+  * Add the `toString(Number)` method.
+
 1.7 (2023-12-05)
 ----------------
 
@@ -25,7 +34,6 @@ Introduce a mechanism to support CBOR tags of "Content Hints" (RFC 8949 Section 
 - `CBORTaggedItem` class
   * Add the `prettify(String, String, Number)` method.
   * Remove the `prettify(String, String)` method.
-
 
 1.6 (2023-12-03)
 ----------------
