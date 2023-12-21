@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+- `CBORPairsBuilder` class
+  * Add the `add(Object, Object)` method.
+  * Add the `addUnlessNull(Object, Object)` method.
+
+- `COSEKey` class
+  * Add the `fromJwk(Map<String, Object>)` method.
+
 1.10 (2023-12-05)
 -----------------
 

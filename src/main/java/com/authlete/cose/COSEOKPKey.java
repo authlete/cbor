@@ -21,7 +21,9 @@ import java.util.Map;
 import com.authlete.cbor.CBORByteArray;
 import com.authlete.cbor.CBORItem;
 import com.authlete.cbor.CBORPair;
+import com.authlete.cbor.CBORPairsBuilder;
 import com.authlete.cbor.CBORString;
+import com.authlete.cose.constants.COSEEllipticCurves;
 import com.authlete.cose.constants.COSEKeyTypeParameters;
 
 
@@ -222,5 +224,59 @@ public class COSEOKPKey extends COSEKey
     public byte[] getD()
     {
         return d;
+    }
+
+
+    static void addCoseKtySpecificParameters(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        // crv
+        addCoseOKPCrv(builder, jwk);
+
+        // x
+        addCoseOKPX(builder, jwk);
+
+        // d
+        addCoseOKPD(builder, jwk);
+    }
+
+
+    private static void addCoseOKPCrv(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        String crv = extractStringProperty(jwk, "crv", /* required */ false);
+
+        if (crv == null)
+        {
+            return;
+        }
+
+        int value = COSEEllipticCurves.getValueByName(crv);
+
+        if (value == 0)
+        {
+            throw new COSEException(String.format(
+                    "The curve '%s' is not supported.", crv));
+        }
+
+        builder.add(COSEKeyTypeParameters.OKP_CRV, value);
+    }
+
+
+    private static void addCoseOKPX(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        byte[] value = extractBase64UrlProperty(jwk, "x", /* required */ false);
+
+        builder.addUnlessNull(COSEKeyTypeParameters.OKP_X, value);
+    }
+
+
+    private static void addCoseOKPD(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        byte[] value = extractBase64UrlProperty(jwk, "d", /* required */ false);
+
+        builder.addUnlessNull(COSEKeyTypeParameters.OKP_D, value);
     }
 }

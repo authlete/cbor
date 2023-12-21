@@ -25,6 +25,7 @@ import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import com.authlete.cbor.CBORBigInteger;
 import com.authlete.cbor.CBORByteArray;
 import com.authlete.cbor.CBORInteger;
@@ -33,6 +34,7 @@ import com.authlete.cbor.CBORItemList;
 import com.authlete.cbor.CBORLong;
 import com.authlete.cbor.CBORPair;
 import com.authlete.cbor.CBORPairList;
+import com.authlete.cbor.CBORPairsBuilder;
 import com.authlete.cbor.CBORString;
 import com.authlete.cbor.CBORValue;
 import com.authlete.cbor.CBORizer;
@@ -527,6 +529,15 @@ public class COSEKey extends CBORPairList
 
 
     /**
+     * Decode the given string by base64url.
+     */
+    private static byte[] decodeByBase64Url(String string)
+    {
+        return Base64.getUrlDecoder().decode(string);
+    }
+
+
+    /**
      * Convert COSE 'key_ops' to JWK 'key_ops'.
      */
     private static List<String> toJwkKeyOps(List<Object> keyOps)
@@ -752,5 +763,307 @@ public class COSEKey extends CBORPairList
     public static COSEKey build(Map<Object, Object> map) throws COSEException
     {
         return build(new CBORizer().cborizeMap(map));
+    }
+
+
+    /**
+     * Build a {@link COSEKey} instance from a map that represents a JWK
+     * (JSON Web Key).
+     *
+     * @param jwk
+     *         A map that represents a JWK.
+     *
+     * @return
+     *         An instance of {@link COSEKey} or its subclass such as
+     *         {@link COSEEC2Key}.
+     *
+     * @throws COSEException
+     *         Failed to create a {@link COSEKey} instance of the input map.
+     *
+     * @since 1.11
+     */
+    public static COSEKey fromJwk(Map<String, Object> jwk) throws COSEException
+    {
+        if (jwk == null)
+        {
+            return null;
+        }
+
+        CBORPairsBuilder builder = new CBORPairsBuilder();
+
+        // kty
+        int kty = addCoseKty(builder, jwk);
+
+        // kid
+        addCoseKid(builder, jwk);
+
+        // alg
+        addCoseAlg(builder, jwk);
+
+        // key_ops
+        addCoseKeyOps(builder, jwk);
+
+        // Add kty-specific parameters.
+        addCoseKtySpecificParameters(builder, jwk, kty);
+
+        return build(new CBORPairList(builder.build()));
+    }
+
+
+    private static Object extractProperty(
+            Map<String, Object> jwk, String key, boolean required) throws COSEException
+    {
+        Object value = jwk.get(key);
+
+        if (value != null || !required)
+        {
+            return value;
+        }
+
+        throw new COSEException(String.format(
+                "The '%s' property is missing or its value is null.", key));
+    }
+
+
+    static String extractStringProperty(
+            Map<String, Object> jwk, String key, boolean required) throws COSEException
+    {
+        Object value = extractProperty(jwk, key, required);
+
+        if (value == null)
+        {
+            return null;
+        }
+
+        if (!(value instanceof String))
+        {
+            throw new COSEException(String.format(
+                    "The value of the '%s' property is not a string.", key));
+        }
+
+        return (String)value;
+    }
+
+
+    private static List<?> extractListProperty(
+            Map<String, Object> jwk, String key, boolean required) throws COSEException
+    {
+        Object value = extractProperty(jwk, key, required);
+
+        if (value == null)
+        {
+            return null;
+        }
+
+        if (!(value instanceof List))
+        {
+            throw new COSEException(String.format(
+                    "The value of the '%s' property is not an array.", key));
+        }
+
+        return (List<?>)value;
+    }
+
+
+    private static List<String> extractStringListProperty(
+            Map<String, Object> jwk, String key, boolean required) throws COSEException
+    {
+        List<?> list = extractListProperty(jwk, key, required);
+
+        if (list == null)
+        {
+            return null;
+        }
+
+        for (Object element : list)
+        {
+            if (element instanceof String)
+            {
+                continue;
+            }
+
+            throw new COSEException(String.format(
+                    "The '%s' array contains a non-string element.", key));
+        }
+
+        return list.stream()
+                .map(element -> (String)element)
+                .collect(Collectors.toList());
+    }
+
+
+    static byte[] extractBase64UrlProperty(
+            Map<String, Object> jwk, String key, boolean required) throws COSEException
+    {
+        String value = extractStringProperty(jwk, key, required);
+
+        if (value == null)
+        {
+            return null;
+        }
+
+        return decodeByBase64Url(value);
+    }
+
+
+    private static int addCoseKty(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        // The value of the "kty" property. This property is mandatory.
+        String kty = extractStringProperty(jwk, "kty", /* required */ true);
+
+        int value;
+
+        switch (kty)
+        {
+            case "OKP":
+                value = COSEKeyTypes.OKP;
+                break;
+
+            case "EC":
+                value = COSEKeyTypes.EC2;
+                break;
+
+            case "RSA":
+                value = COSEKeyTypes.RSA;
+                break;
+
+            default:
+                throw new COSEException(String.format(
+                        "The key type '%s' is not supported.", kty));
+        }
+
+        builder.add(COSEKeyCommonParameters.KTY, value);
+
+        return value;
+    }
+
+
+    private static void addCoseKid(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        // The value of the "kid" property.
+        String kid = extractStringProperty(jwk, "kid", /* required */ false);
+
+        if (kid == null)
+        {
+            // The "kid" property is optional.
+            return;
+        }
+
+        // The UTF-8 byte sequence of the string.
+        byte[] value = kid.getBytes(StandardCharsets.UTF_8);
+
+        builder.add(COSEKeyCommonParameters.KID, value);
+    }
+
+
+    private static void addCoseAlg(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        // The value of the "alg" property.
+        String alg = extractStringProperty(jwk, "alg", /* required */ false);
+
+        if (alg == null)
+        {
+            // The "alg" property is optional.
+            return;
+        }
+
+        // Get the number assigned to the algorithm.
+        int value = COSEAlgorithms.getValueByName(alg);
+
+        if (value == 0)
+        {
+            throw new COSEException(String.format(
+                    "The algorithm '%s' is not supported.", alg));
+        }
+
+        builder.add(COSEKeyCommonParameters.ALG, value);
+    }
+
+
+    private static void addCoseKeyOps(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        // The value of the "key_ops" property.
+        List<String> keyOps = extractStringListProperty(jwk, "key_ops", /* required */ false);
+
+        if (keyOps == null)
+        {
+            // The "key_ops" property is optional.
+            return;
+        }
+
+        List<Integer> coseKeyOps = new ArrayList<>();
+
+        for (String keyOp : keyOps)
+        {
+            // Convert the JWK key operation to a COSE key operation.
+            int coseKeyOp = toCoseKeyOp(keyOp);
+
+            if (coseKeyOp == 0)
+            {
+                throw new COSEException(String.format(
+                        "The key operation '%s' is not supported.", keyOp));
+            }
+
+            coseKeyOps.add(coseKeyOp);
+        }
+
+        builder.add(COSEKeyCommonParameters.KEY_OPS, coseKeyOps);
+    }
+
+
+    private static int toCoseKeyOp(String keyOp)
+    {
+        switch (keyOp)
+        {
+            case "sign":
+                return COSEKeyOperations.SIGN;
+
+            case "verify":
+                return COSEKeyOperations.VERIFY;
+
+            case "encrypt":
+                return COSEKeyOperations.ENCRYPT;
+
+            case "decrypt":
+                return COSEKeyOperations.DECRYPT;
+
+            case "wrapKey":
+                return COSEKeyOperations.WRAP_KEY;
+
+            case "unwrapKey":
+                return COSEKeyOperations.UNWRAP_KEY;
+
+            case "deriveKey":
+                return COSEKeyOperations.DERIVE_KEY;
+
+            case "deriveBits":
+                return COSEKeyOperations.DERIVE_BITS;
+
+            default:
+                return 0;
+        }
+    }
+
+
+    private static void addCoseKtySpecificParameters(
+            CBORPairsBuilder builder, Map<String, Object> jwk, int kty) throws COSEException
+    {
+        switch (kty)
+        {
+            case COSEKeyTypes.OKP:
+                COSEOKPKey.addCoseKtySpecificParameters(builder, jwk);
+                break;
+
+            case COSEKeyTypes.EC2:
+                COSEEC2Key.addCoseKtySpecificParameters(builder, jwk);
+                break;
+
+            default:
+                break;
+        }
     }
 }

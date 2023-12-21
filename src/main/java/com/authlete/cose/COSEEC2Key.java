@@ -25,7 +25,9 @@ import com.authlete.cbor.CBORByteArray;
 import com.authlete.cbor.CBORInteger;
 import com.authlete.cbor.CBORItem;
 import com.authlete.cbor.CBORPair;
+import com.authlete.cbor.CBORPairsBuilder;
 import com.authlete.cbor.CBORString;
+import com.authlete.cose.constants.COSEEllipticCurves;
 import com.authlete.cose.constants.COSEKeyTypeParameters;
 
 
@@ -318,5 +320,71 @@ public class COSEEC2Key extends COSEKey
     public ECPublicKey toECPublicKey() throws COSEException
     {
         return ECDSA.createPublicKey(crv, x, y);
+    }
+
+
+    static void addCoseKtySpecificParameters(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        // crv
+        addCoseEC2Crv(builder, jwk);
+
+        // x
+        addCoseEC2X(builder, jwk);
+
+        // y
+        addCoseEC2Y(builder, jwk);
+
+        // d
+        addCoseEC2D(builder, jwk);
+    }
+
+
+    private static void addCoseEC2Crv(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        String crv = extractStringProperty(jwk, "crv", /* required */ false);
+
+        if (crv == null)
+        {
+            return;
+        }
+
+        int value = COSEEllipticCurves.getValueByName(crv);
+
+        if (value == 0)
+        {
+            throw new COSEException(String.format(
+                    "The curve '%s' is not supported.", crv));
+        }
+
+        builder.add(COSEKeyTypeParameters.EC2_CRV, value);
+    }
+
+
+    private static void addCoseEC2X(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        byte[] value = extractBase64UrlProperty(jwk, "x", /* required */ false);
+
+        builder.addUnlessNull(COSEKeyTypeParameters.EC2_X, value);
+    }
+
+
+    private static void addCoseEC2Y(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        byte[] value = extractBase64UrlProperty(jwk, "y", /* required */ false);
+
+        builder.addUnlessNull(COSEKeyTypeParameters.EC2_Y, value);
+    }
+
+
+    private static void addCoseEC2D(
+            CBORPairsBuilder builder, Map<String, Object> jwk) throws COSEException
+    {
+        byte[] value = extractBase64UrlProperty(jwk, "d", /* required */ false);
+
+        builder.addUnlessNull(COSEKeyTypeParameters.EC2_D, value);
     }
 }

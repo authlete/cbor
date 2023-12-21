@@ -72,6 +72,34 @@ public class CBORPairsBuilder
 
 
     /**
+     * Add a pair.
+     *
+     * @param label
+     *         The label of the pair. An instance of {@link CBORItem}
+     *         corresponding to the given object will be created (or a shared
+     *         object is reused) unless the given object is already an instance
+     *         of {@code CBORItem}.
+     *
+     * @param value
+     *         The value of the pair. An instance of {@link CBORItem}
+     *         corresponding to the given object will be created (or a shared
+     *         object is reused) unless the given object is already an instance
+     *         of {@code CBORItem}.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.11
+     */
+    public CBORPairsBuilder add(Object label, Object value)
+    {
+        CBORizer cborizer = new CBORizer();
+
+        return add(cborizer.cborize(label), cborizer.cborize(value));
+    }
+
+
+    /**
      * Add a pair unless the given value is null.
      *
      * @param label
@@ -95,7 +123,7 @@ public class CBORPairsBuilder
 
 
     /**
-     * Add a pair.
+     * Add a pair unless the given value is null.
      *
      * @param label
      *         The label of the pair.
@@ -114,6 +142,39 @@ public class CBORPairsBuilder
         if (value != null)
         {
             add(label, value);
+        }
+
+        return this;
+    }
+
+
+    /**
+     * Add a pair unless the given value is null.
+     *
+     * @param label
+     *         The label of the pair. An instance of {@link CBORItem}
+     *         corresponding to the given object will be created (or a shared
+     *         object is reused) unless the given object is already an instance
+     *         of {@code CBORItem}.
+     *
+     * @param value
+     *         The value of the pair. An instance of {@link CBORItem}
+     *         corresponding to the given object will be created (or a shared
+     *         object is reused) unless the given object is already an instance
+     *         of {@code CBORItem}.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @since 1.11
+     */
+    public CBORPairsBuilder addUnlessNull(Object label, Object value)
+    {
+        if (value != null)
+        {
+            CBORizer cborizer = new CBORizer();
+
+            add(cborizer.cborize(label), cborizer.cborize(value));
         }
 
         return this;
