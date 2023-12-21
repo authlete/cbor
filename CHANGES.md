@@ -1,6 +1,9 @@
 CHANGES
 =======
 
+1.11 (2023-12-22)
+-----------------
+
 - `CBORPairsBuilder` class
   * Add the `add(Object, Object)` method.
   * Add the `addUnlessNull(Object, Object)` method.
