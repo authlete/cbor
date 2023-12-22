@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+- New Types
+  * `com.authlete.mdoc.constants` package with the following classes.
+    - `MDLClaimNames` class
+    - `MDLConstants` class
+
 1.11 (2023-12-22)
 -----------------
 
