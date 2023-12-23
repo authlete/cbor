@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+1.13 (2023-12-23)
+-----------------
+
+- `CBORItem` class
+  * Fix the `encodeToBase64Url()` method to drop padding characters.
+
 1.12 (2023-12-23)
 -----------------
 
