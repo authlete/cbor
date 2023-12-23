@@ -141,7 +141,7 @@ public abstract class CBORItem
      */
     public String encodeToBase64Url()
     {
-        return Base64.getUrlEncoder().encodeToString(encode());
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(encode());
     }
 
 
