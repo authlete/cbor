@@ -23,6 +23,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPrivateKey;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -907,7 +908,7 @@ public class IssuerSignedBuilder
 
         if (claims == null)
         {
-            claims = Map.of();
+            claims = Collections.emptyMap();
         }
 
         return claims;

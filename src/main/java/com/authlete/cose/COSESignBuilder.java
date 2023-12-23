@@ -18,6 +18,7 @@ package com.authlete.cose;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.authlete.cbor.CBORByteArray;
 import com.authlete.cbor.CBORItem;
@@ -183,7 +184,7 @@ public class COSESignBuilder
 
         if (unprotectedHeader == null)
         {
-            unprotectedHeader = new COSEUnprotectedHeader(List.of());
+            unprotectedHeader = new COSEUnprotectedHeader(Collections.emptyList());
         }
 
         if (payload == null)

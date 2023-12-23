@@ -16,15 +16,16 @@
 package com.authlete.cose;
 
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import com.authlete.cose.constants.COSEAlgorithms;
 import com.authlete.cose.constants.COSEEllipticCurves;
 import com.authlete.cose.constants.COSEKeyOperations;
@@ -40,7 +41,7 @@ public class COSEKeyTest
         map.put("kty",     "EC");
         map.put("alg",     "ES256");
         map.put("kid",     "614zVgCx2TB6G3UFaSDa8OXtsOErqey5NuaLbeEIfnc");
-        map.put("key_ops", List.of("sign"));
+        map.put("key_ops", Arrays.asList("sign"));
         map.put("crv",     "P-256");
         map.put("x",       "uPoOtJEwVeqcK981etm_Dt4GMcuurZgQmLTy01JP8Go");
         map.put("y",       "7U96jtdK6VCOFK-MzCKLDQtLyrCRBbO0iI1nVRXfeTU");

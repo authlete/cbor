@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -430,7 +431,7 @@ public class CWTClaimsSet extends CBORPairList
 
         if (pairs == null)
         {
-            pairs = List.of();
+            pairs = Collections.emptyList();
         }
 
         try
@@ -486,7 +487,7 @@ public class CWTClaimsSet extends CBORPairList
     {
         if (map == null)
         {
-            map = Map.of();
+            map = Collections.emptyMap();
         }
 
         // Convert the map into a CBOR map.

@@ -195,7 +195,7 @@ class ClaimsValidator
         else if (value instanceof CBORFloat || value instanceof CBORDouble)
         {
             // Convert float or double to double.
-            double d = (double)((CBORValue<?>)value).getValue();
+            double d = ((Number)((CBORValue<?>)value).getValue()).doubleValue();
 
             if (d < Long.MIN_VALUE || Long.MAX_VALUE < d)
             {

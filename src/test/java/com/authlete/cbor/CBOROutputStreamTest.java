@@ -16,17 +16,18 @@
 package com.authlete.cbor;
 
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class CBOROutputStreamTest
@@ -413,7 +414,7 @@ public class CBOROutputStreamTest
     @Test
     public void test_collection()
     {
-        List<Integer> input = List.of(1, 2, 3);
+        List<Integer> input = Arrays.asList(1, 2, 3);
 
         testCollection("83010203", input);
     }
@@ -425,7 +426,7 @@ public class CBOROutputStreamTest
         Map<Object, Object> input = new LinkedHashMap<>();
 
         input.put("a", 1);
-        input.put("b", List.of(2,3));
+        input.put("b", Arrays.asList(2,3));
 
         testMap("a26161016162820203", input);
     }

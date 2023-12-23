@@ -1,6 +1,20 @@
 CHANGES
 =======
 
+- Lower the minimum Java version from 11 to 8.
+
+- Switch from JUnit 4 to JUnit 5.
+
+- `CBORItemList` class
+  * Add the `CBORItemList(T...)` constructor.
+
+- `CBORPairList` class
+  * Add the `CBORPairList(T...)` constructor.
+
+- `ECDSA` class
+  * Load the `BouncyCastleProvider` and adjust the algorithm name passed to
+    the `Signature.getInstance(String)` method when the JRE is older than 9.
+
 1.13 (2023-12-23)
 -----------------
 

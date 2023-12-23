@@ -18,6 +18,7 @@ package com.authlete.cbor;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,7 +97,7 @@ public class CBORByteArray extends CBORValue<byte[]>
      */
     public CBORByteArray(byte[] value, CBORItem decodedContent)
     {
-        this(value, (decodedContent != null) ? List.of(decodedContent) : null);
+        this(value, (decodedContent != null) ? Arrays.asList(decodedContent) : null);
     }
 
 

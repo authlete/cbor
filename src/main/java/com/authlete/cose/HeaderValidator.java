@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -334,7 +335,7 @@ class HeaderValidator
         // the X509Certificate class.
         X509Certificate cert = buildCertificate(der);
 
-        return List.of(cert);
+        return Arrays.asList(cert);
     }
 
 

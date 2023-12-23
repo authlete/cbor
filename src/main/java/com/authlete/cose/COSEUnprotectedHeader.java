@@ -23,6 +23,7 @@ import static com.authlete.cose.constants.COSEHeaderParameters.KID;
 import static com.authlete.cose.constants.COSEHeaderParameters.PARTIAL_IV;
 import static com.authlete.cose.constants.COSEHeaderParameters.X5CHAIN;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.authlete.cbor.CBORItem;
@@ -291,7 +292,7 @@ public class COSEUnprotectedHeader extends CBORPairList
     {
         if (map == null)
         {
-            map = Map.of();
+            map = Collections.emptyMap();
         }
 
         // Convert the Java map into a CBOR map.

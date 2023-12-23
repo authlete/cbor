@@ -19,13 +19,16 @@ package com.authlete.cose;
 import static com.authlete.cose.ECDSAConstants.PARAMETER_SPEC_P256;
 import static com.authlete.cose.ECDSAConstants.PARAMETER_SPEC_P384;
 import static com.authlete.cose.ECDSAConstants.PARAMETER_SPEC_P521;
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.interfaces.ECPrivateKey;
@@ -36,6 +39,7 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.authlete.cose.constants.COSEAlgorithms;
 import com.authlete.cose.constants.COSEEllipticCurves;
 
@@ -50,7 +54,18 @@ import com.authlete.cose.constants.COSEEllipticCurves;
  */
 class ECDSA
 {
+    private static final BigInteger TWO   = new BigInteger("2");
     private static final BigInteger THREE = new BigInteger("3");
+    private static final boolean beforeJre9;
+    private static boolean isBouncyCastleProviderLoaded;
+    private static Method sSqrtAndRemainder;
+
+
+    static
+    {
+        // True if the version of the JRE is older than 9.
+        beforeJre9 = System.getProperty("java.version").matches("^1\\.[0-8](\\..*)?$");
+    }
 
 
     /**
@@ -237,7 +252,7 @@ class ECDSA
         try
         {
             // Compute the square root.
-            BigInteger[] result = y2.sqrtAndRemainder();
+            BigInteger[] result = sqrtAndRemainder(y2);
 
             y = result[0].mod(p);
             remainder = result[1];
@@ -256,12 +271,48 @@ class ECDSA
         }
 
         // If (y === bit mod 2) is not true
-        if (y.mod(BigInteger.TWO).equals(BigInteger.ONE) != bit)
+        if (y.mod(TWO).equals(BigInteger.ONE) != bit)
         {
             y = p.subtract(y);
         }
 
         return y;
+    }
+
+
+    private static BigInteger[] sqrtAndRemainder(BigInteger bi) throws COSEException
+    {
+        if (sSqrtAndRemainder == null)
+        {
+            try
+            {
+                // The sqrtAndRemainder() method, which is available since Java 9.
+                sSqrtAndRemainder = BigInteger.class.getMethod("sqrtAndRemainder");
+            }
+            catch (Exception cause)
+            {
+                throw new COSEException(String.format(
+                        "Cannot compute the value of the compressed elliptic curve point: %s",
+                        cause.getMessage()), cause);
+            }
+        }
+
+        try
+        {
+            // return bi.sqrtAndRemainder();
+            return (BigInteger[])sSqrtAndRemainder.invoke(bi);
+        }
+        catch (ArithmeticException cause)
+        {
+            // The compressed elliptic curve point is invalid.
+            throw cause;
+        }
+        catch (Exception cause)
+        {
+            throw new COSEException(String.format(
+                    "Cannot compute the value of the compressed elliptic curve point: %s",
+                    cause.getMessage()), cause);
+        }
     }
 
 
@@ -403,27 +454,11 @@ class ECDSA
      */
     private static Signature getSignatureInstance(int algorithm) throws COSEException
     {
-        String algorithmName;
+        // Determine the algorithm name given to Signature.getInstance(String).
+        String algorithmName = determineAlgorithmName(algorithm);
 
-        switch (algorithm)
-        {
-            case COSEAlgorithms.ES256:
-                algorithmName = "SHA256withECDSAinP1363Format";
-                break;
-
-            case COSEAlgorithms.ES384:
-                algorithmName = "SHA384withECDSAinP1363Format";
-                break;
-
-            case COSEAlgorithms.ES512:
-                algorithmName = "SHA512withECDSAinP1363Format";
-                break;
-
-            default:
-                // This should not happen.
-                throw new COSEException(String.format(
-                        "The ECDSA algorithm '%d' is not supported.", algorithm));
-        }
+        // Ensure that the BouncyCastleProvider has been loaded if necessary.
+        ensureProvider();
 
         try
         {
@@ -436,6 +471,58 @@ class ECDSA
                     "Failed to get a Signature instance for the algorithm '%s'.",
                     algorithmName));
         }
+    }
+
+
+    private static String determineAlgorithmName(int algorithm) throws COSEException
+    {
+        switch (algorithm)
+        {
+            case COSEAlgorithms.ES256:
+                return beforeJre9 ? "SHA256withPLAIN-ECDSA" : "SHA256withECDSAinP1363Format";
+
+            case COSEAlgorithms.ES384:
+                return beforeJre9 ? "SHA384withPLAIN-ECDSA" : "SHA384withECDSAinP1363Format";
+
+            case COSEAlgorithms.ES512:
+                return beforeJre9 ? "SHA512withPLAIN-ECDSA" : "SHA512withECDSAinP1363Format";
+
+            default:
+                // This should not happen.
+                throw new COSEException(String.format(
+                        "The ECDSA algorithm '%d' is not supported.", algorithm));
+        }
+    }
+
+
+    private static void ensureProvider()
+    {
+        if (beforeJre9 == false)
+        {
+            // No need to load the BouncyCastleProvider.
+            return;
+        }
+
+        if (isBouncyCastleProviderLoaded)
+        {
+            // The BouncyCastleProvider has already been loaded.
+            return;
+        }
+
+        for (Provider provider : Security.getProviders())
+        {
+            // If the BouncyCastleProvider has already been loaded somewhere else.
+            if (provider instanceof BouncyCastleProvider)
+            {
+                isBouncyCastleProviderLoaded = true;
+                return;
+            }
+        }
+
+        // Load the BouncyCastleProvider.
+        Security.addProvider(new BouncyCastleProvider());
+
+        isBouncyCastleProviderLoaded = true;
     }
 
 

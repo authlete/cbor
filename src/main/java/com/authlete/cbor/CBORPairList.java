@@ -18,6 +18,7 @@ package com.authlete.cbor;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,21 @@ public class CBORPairList extends CBORItem
     public CBORPairList(List<? extends CBORPair> pairs)
     {
         this.pairs = pairs;
+    }
+
+
+    /**
+     * A constructor with a list of key-value pairs that this CBOR map holds.
+     *
+     * @param pairs
+     *         A list of key-value pairs.
+     *
+     * @since 1.14
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends CBORPair> CBORPairList(T... pairs)
+    {
+        this(Arrays.asList(pairs));
     }
 
 
