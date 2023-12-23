@@ -204,8 +204,9 @@ public class CBORPair
      *
      * <p>
      * This method is called from the implementation of the
-     * {@link CBORPairList#prettify(String, String) prettify(String, String)}
-     * method of the {@link CBORPairList} class.
+     * {@link CBORPairList#prettify(String, String, Number)
+     * prettify(String, String, Number)} method of the
+     * {@link CBORPairList} class.
      * </p>
      *
      * @param indent

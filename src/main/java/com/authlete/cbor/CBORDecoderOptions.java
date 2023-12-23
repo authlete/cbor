@@ -22,7 +22,7 @@ import com.authlete.cbor.tag.CBORTagProcessor;
 
 
 /**
- * Options to control the behavior of the CBOR decoder ({@link #CBORDecoder}).
+ * Options to control the behavior of the CBOR decoder ({@link CBORDecoder}).
  */
 public class CBORDecoderOptions
 {
