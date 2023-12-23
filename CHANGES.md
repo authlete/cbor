@@ -1,6 +1,9 @@
 CHANGES
 =======
 
+1.14 (2023-12-24)
+-----------------
+
 - Lower the minimum Java version from 11 to 8.
 
 - Switch from JUnit 4 to JUnit 5.
