@@ -16,7 +16,6 @@
 package com.authlete.mdoc;
 
 
-import java.util.List;
 import com.authlete.cbor.CBORPair;
 import com.authlete.cbor.CBORPairList;
 import com.authlete.cbor.CBORString;
@@ -59,12 +58,12 @@ public class DeviceAuth extends CBORPairList
 
     public DeviceAuth(COSESign1 deviceSignature)
     {
-        super(List.of(new CBORPair(LABEL_DEVICE_SIGNATURE, deviceSignature)));
+        super(new CBORPair(LABEL_DEVICE_SIGNATURE, deviceSignature));
     }
 
 
     public DeviceAuth(COSEMac0 deviceMac)
     {
-        super(List.of(new CBORPair(LABEL_DEVICE_MAC, deviceMac)));
+        super(new CBORPair(LABEL_DEVICE_MAC, deviceMac));
     }
 }

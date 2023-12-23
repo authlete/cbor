@@ -16,15 +16,17 @@
 package com.authlete.cbor;
 
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class CBOREncodingTest
@@ -737,7 +739,7 @@ public class CBOREncodingTest
         // Encoded:    0x80
 
         // Array
-        testArray(List.of(), "80");
+        testArray(Collections.emptyList(), "80");
     }
 
 
@@ -747,7 +749,7 @@ public class CBOREncodingTest
         // Diagnostic: [1, 2, 3]
         // Encoded:    0x83010203
 
-        List<Integer> list = List.of(1,2,3);
+        List<Integer> list = Arrays.asList(1,2,3);
 
         testArray(list, "83010203");
     }
@@ -761,8 +763,8 @@ public class CBOREncodingTest
 
         List<Object> list = new ArrayList<>();
         list.add(1);
-        list.add(List.of(2,3));
-        list.add(List.of(4,5));
+        list.add(Arrays.asList(2,3));
+        list.add(Arrays.asList(4,5));
 
         testArray(list, "8301820203820405");
     }
@@ -791,7 +793,7 @@ public class CBOREncodingTest
         // Diagnostic: {}
         // Encoded:    0xa0
 
-        Map<Object,Object> map = Map.of();
+        Map<Object,Object> map = Collections.emptyMap();
 
         testMap(map, "a0");
     }
@@ -819,7 +821,7 @@ public class CBOREncodingTest
 
         Map<Object,Object> map = new LinkedHashMap<>();
         map.put("a", 1);
-        map.put("b", List.of(2,3));
+        map.put("b", Arrays.asList(2,3));
 
         testMap(map, "a26161016162820203");
     }
@@ -831,7 +833,7 @@ public class CBOREncodingTest
         // Diagnostic: ["a", {"b": "c"}]
         // Encoded:    0x826161a161626163
 
-        List<Object> list = List.of("a", Map.of("b","c"));
+        List<Object> list = Arrays.asList("a", Collections.singletonMap("b","c"));
 
         testArray(list, "826161a161626163");
     }

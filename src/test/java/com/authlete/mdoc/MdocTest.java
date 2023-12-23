@@ -16,16 +16,17 @@
 package com.authlete.mdoc;
 
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import com.authlete.cbor.CBORItem;
 import com.authlete.cbor.CBORValue;
 import com.authlete.cose.COSEEC2Key;
@@ -89,7 +90,7 @@ public class MdocTest
                                 issuerCertPem.getBytes(StandardCharsets.UTF_8)));
 
         // Certificate chain for the issuer key.
-        List<X509Certificate> issuerCertChain = List.of(issuerCert);
+        List<X509Certificate> issuerCertChain = Arrays.asList(issuerCert);
 
         // Build an "IssuerSigned" instance.
         IssuerSigned issuerSigned = new IssuerSignedBuilder()
@@ -105,7 +106,7 @@ public class MdocTest
 
         // Build a "DeviceResponse" instance.
         @SuppressWarnings("unused")
-        DeviceResponse deviceResponse = new DeviceResponse(List.of(document));
+        DeviceResponse deviceResponse = new DeviceResponse(Arrays.asList(document));
 
         // The actual value held by the document instance.
         String actualDocType = (String)((CBORValue<?>)

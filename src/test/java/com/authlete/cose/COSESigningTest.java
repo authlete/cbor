@@ -16,22 +16,24 @@
 package com.authlete.cose;
 
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import java.nio.charset.StandardCharsets;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import com.authlete.cbor.CBORItem;
 import com.authlete.cose.constants.COSEAlgorithms;
 import com.authlete.cose.constants.COSEEllipticCurves;
@@ -230,7 +232,7 @@ public class COSESigningTest
             // Verify the COSESign object.
             boolean valid = verifier.verify(sign);
 
-            assertTrue("Signature verification failed.", valid);
+            assertTrue(valid, "Signature verification failed.");
         }
         catch (Exception cause)
         {
@@ -284,7 +286,7 @@ public class COSESigningTest
             // Verify the COSESign1 object.
             boolean valid = verifier.verify(sign1);
 
-            assertTrue("Signature verification failed.", valid);
+            assertTrue(valid, "Signature verification failed.");
         }
         catch (Exception cause)
         {
@@ -306,11 +308,11 @@ public class COSESigningTest
 
         // Verify; the result should be valid.
         boolean valid = COSEVerifier.verify(EC_PUBLIC_KEY_11, alg, data, signature);
-        assertTrue("Signature verification failed.", valid);
+        assertTrue(valid, "Signature verification failed.");
 
         // Verify; the result should be invalid.
         valid = COSEVerifier.verify(EC_PUBLIC_KEY_11, alg, data2, signature);
-        assertFalse("Signature verification failed.", valid);
+        assertFalse(valid, "Signature verification failed.");
     }
 
 
@@ -358,7 +360,7 @@ public class COSESigningTest
         // Verification
         boolean valid = verifier.verify(sign1);
 
-        assertTrue("Signature verification failed.", valid);
+        assertTrue(valid, "Signature verification failed.");
     }
 
 
@@ -442,7 +444,7 @@ public class COSESigningTest
         COSEKey coseKey = new COSEKeyBuilder()
                 .ktyEC2()
                 .alg(COSEAlgorithms.ES256)
-                .keyOps(List.of(COSEKeyOperations.VERIFY))
+                .keyOps(Arrays.asList(COSEKeyOperations.VERIFY))
                 .ec2Crv(COSEEllipticCurves.P_256)
                 .ec2X(fromHex("bac5b11cad8f99f9c72b05cf4b9e26d244dc189f745228255a219a86d6a09eff"))
                 .ec2Y(fromHex("20138bf82dc1b6d562be0fa54ab7804a3a64b6d72ccfed6b6fb6ed28bbfc117e"))
@@ -452,7 +454,7 @@ public class COSESigningTest
         Map<String, Object> map = coseKey.toJwk();
 
         String       expectedAlg    = "ES256";
-        List<String> expectedKeyOps = List.of("verify");
+        List<String> expectedKeyOps = Arrays.asList("verify");
 
         assertEquals(expectedAlg,    map.get("alg"));
         assertEquals(expectedKeyOps, map.get("key_ops"));
@@ -460,7 +462,10 @@ public class COSESigningTest
         // Convert the map to a JWK.
         JWK jwk = toJwk(map);
 
-        assertEquals(JWSAlgorithm.ES256,          jwk.getAlgorithm());
-        assertEquals(Set.of(KeyOperation.VERIFY), jwk.getKeyOperations());
+        Set<KeyOperation> expectedKeyOperations =
+                new HashSet<>(Arrays.asList(KeyOperation.VERIFY));
+
+        assertEquals(JWSAlgorithm.ES256,    jwk.getAlgorithm());
+        assertEquals(expectedKeyOperations, jwk.getKeyOperations());
     }
 }

@@ -19,6 +19,7 @@ package com.authlete.cbor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,21 @@ public class CBORItemList extends CBORItem
     public CBORItemList(List<? extends CBORItem> items)
     {
         this.items = items;
+    }
+
+
+    /**
+     * A constructor with a list of CBOR data items that this CBOR array holds.
+     *
+     * @param items
+     *         A list of CBOR data items.
+     *
+     * @since 1.14
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends CBORItem> CBORItemList(T... items)
+    {
+        this(Arrays.asList(items));
     }
 
 

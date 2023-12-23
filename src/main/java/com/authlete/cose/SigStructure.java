@@ -16,7 +16,6 @@
 package com.authlete.cose;
 
 
-import java.util.List;
 import com.authlete.cbor.CBORByteArray;
 import com.authlete.cbor.CBORItem;
 import com.authlete.cbor.CBORItemList;
@@ -89,7 +88,7 @@ public class SigStructure extends CBORItemList
             COSEProtectedHeader signerAttributes,
             CBORByteArray externalData, CBORItem payload)
     {
-        super(List.of(CONTEXT_SIGNATURE, bodyAttributes, signerAttributes, externalData, payload));
+        super(CONTEXT_SIGNATURE, bodyAttributes, signerAttributes, externalData, payload);
 
         validateArgument("bodyAttributes",   bodyAttributes);
         validateArgument("signerAttributes", signerAttributes);
@@ -127,7 +126,7 @@ public class SigStructure extends CBORItemList
             COSEProtectedHeader bodyAttributes,
             CBORByteArray externalData, CBORItem payload)
     {
-        super(List.of(CONTEXT_SIGNATURE1, bodyAttributes, externalData, payload));
+        super(CONTEXT_SIGNATURE1, bodyAttributes, externalData, payload);
 
         validateArgument("bodyAttributes", bodyAttributes);
         validateArgument("externalData",   externalData);
