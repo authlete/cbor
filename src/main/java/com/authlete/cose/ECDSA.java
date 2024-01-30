@@ -461,7 +461,7 @@ class ECDSA
         switch (algorithm)
         {
             case COSEAlgorithms.ES256:
-                return beforeJre9 ? "SHA256withPLAIN-ECDSA" : "SHA256withECDSAinP1363Format";
+                return "SHA256withECDSA"; // TODO: resolve this after testing
 
             case COSEAlgorithms.ES384:
                 return beforeJre9 ? "SHA384withPLAIN-ECDSA" : "SHA384withECDSAinP1363Format";
