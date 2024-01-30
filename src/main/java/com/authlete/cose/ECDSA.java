@@ -356,7 +356,7 @@ class ECDSA
     static byte[] sign(Key key, int algorithm, byte[] data) throws COSEException
     {
         // Make sure that the key implements the ECPrivateKey interface.
-        ECPrivateKey priKey = castByPrivateKey(key, algorithm);
+        PrivateKey priKey = (PrivateKey)key;
 
         // Get a Signature instance that performs signing.
         Signature sig = getSignatureInstance(algorithm);
@@ -413,24 +413,6 @@ class ECDSA
         // Verify the signature.
         return verifySignature(sig, signature);
     }
-
-
-    /**
-     * Cast the key by ECPrivateKey.
-     */
-    private static ECPrivateKey castByPrivateKey(Key key, int algorithm) throws COSEException
-    {
-        // If the key does not implement the ECPrivateKey interface.
-        if (!(key instanceof ECPrivateKey))
-        {
-            throw new COSEException(String.format(
-                    "A key to sign data with the algorithm '%s' must implement the ECPrivateKey interface.",
-                    COSEAlgorithms.getNameByValue(algorithm)));
-        }
-
-        return (ECPrivateKey)key;
-    }
-
 
     /**
      * Cast the key by ECPublicKey.
