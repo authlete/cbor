@@ -22,7 +22,7 @@ be added as the need arises.
 - [x] CWT
   - [x] Tag Processor
   - [x] CWT Claims Set
-  - [ ] ?
+  - [x] CWT Key Proof
 - [x] mdoc
 
 ## License
@@ -82,6 +82,10 @@ The list does not necessarily mean that this library supports all of them.
 ### ISO/IEC
 
 - [ISO/IEC 18013-5:2021][ISO_IEC_18013_5_2021] Personal identification - ISO-compliant driving licence, Part 5: Mobile driving licence (mDL) application
+
+### OpenID
+
+- [OpenID for Verifiable Credential Issuance][OID4VCI]
 
 ## Description
 
@@ -1298,6 +1302,100 @@ COSESign1 message = new COSESign1Builder()
 CWT cwt = new CWT(message);
 ```
 
+### CWT Key Proof
+
+[OpenID for Verifiable Credential Issuance][OID4VCI] defines the structure
+of a key proof in the CWT format. This library provides a utility class,
+`CWTKeyProofBuilder`, to generate a key proof that complies with the
+specification.
+
+```java
+// The identifier of the client application.
+String client = "my_client_id";
+
+// The identifier of the credential issuer.
+String issuer = "https://credential-issuer.example.com";
+
+// The value of 'c_nonce' issued by the authorization server or
+// the credential issuer.
+String nonce = "my_nonce";
+
+// A private key for signing. The public key corresponding to
+// this private key will be embedded in the protected header.
+COSEKey key = ...;
+
+// Generate a CWT representing a key proof.
+CWT cwt = new CWTKeyProofBuilder()
+    .setClient(client)
+    .setIssuer(issuer)
+    .setNonce(nonce)
+    .setKey(key)
+    .build();
+
+// The base64url representation of the key proof.
+String base64url = cwt.encodeToBase64Url();
+```
+
+The variable, `base64url`, in the example above holds a value like below.
+
+```
+2D3ShFidowEmA3RvcGVuaWQ0dmNpLXByb29mK2N3dGhDT1NFX0tleaYBAgJYK0pvWWcwS
+mNhS1VPN00zRDlfUVR1UjR4Zl90MWhZZkNsVG95cS05dC1oWXMDJiABIVgguNp2r4R7DN
+p3gPrnhtc93CY7gSDRdMwTris8ZPoeCGQiWCBFEpNEFZfxlYyevnC8dY9KOVjQhqAOyI7
+m5XtohBHbO6BYR6QDeCVodHRwczovL2NyZWRlbnRpYWwtaXNzdWVyLmV4YW1wbGUuY29t
+BhpmPeFaAWxteV9jbGllbnRfaWQKSG15X25vbmNlWEB6nBjmxfuVI7LVcQKXggEATC-AV
+N_5VifZEC6NLJL-vpFaAppWRgW5QkDmTouV7WGDnXoomamaWzazgVgcvrWo
+```
+
+The following is the CBOR Diagnostic Notation representation of the example
+CWT key proof above. FYI: [CBOR Zone][CBOR_ZONE] can be used to decode CBOR
+data.
+
+```
+61(18(/ COSE_Sign1 / [
+  / protected / <<
+    {
+      1: -7,
+      3: "openid4vci-proof+cwt",
+      "COSE_Key": {
+        1: 2,
+        2: h'4a6f5967304a63614b554f374d3344395f515475523478665f7431685966436c546f79712d39742d685973',
+        3: -7,
+        -1: 1,
+        -2: h'b8da76af847b0cda7780fae786d73ddc263b8120d174cc13ae2b3c64fa1e0864',
+        -3: h'451293441597f1958c9ebe70bc758f4a3958d086a00ec88ee6e57b688411db3b'
+      }
+    }
+  >>,
+  / unprotected / {
+  },
+  h'a403782568747470733a2f2f63726564656e7469616c2d6973737565722e6578616d706c652e636f6d061a663de15a016c6d795f636c69656e745f69640a486d795f6e6f6e6365',
+  h'7a9c18e6c5fb9523b2d57102978201004c2f8054dff95627d9102e8d2c92febe915a029a564605b94240e64e8b95ed61839d7a2899a99a5b36b381581cbeb5a8'
+]))
+```
+
+The `CWTKeyProofBuilder` provides the `main(String[])` method for invocation
+from the command line. The method accepts the following arguments.
+
+| option            | description |
+|:------------------|:------------|
+| `--issuer ISSUER` | REQUIRED. This option specifies the identifier of the credential issuer. |
+| `--key FILE`      | REQUIRED. This option specifies the file containing a private key in the JWK format. |
+| `--client CLIENT` | OPTIONAL. This option specifies the identifier of the client application. |
+| `--nonce NONCE`   | OPTIONAL. This option specifies the value of `c_nonce` that has been issued by the server. |
+| `--help`          | This option shows the help text. |
+
+The [generate-cwt-key-proof](bin/generate-cwt-key-proof) script is a wrapper
+for the command line invocation.
+
+```
+./bin/generate-cwt-key-proof \
+  --issuer https://credential-issuer.example.com \
+  --key private-key.jwk \
+  --client my_client_id \
+  --nonce my_nonce
+```
+
 ### mdoc Building
 
 The `com.authlete.mdoc` package contains classes for building an **mdoc** that
@@ -1608,3 +1706,8 @@ Authlete Contact Form: https://www.authlete.com/contact/
 [IANA_cwt]: https://www.iana.org/assignments/cwt/cwt.xhtml
 
 [ISO_IEC_18013_5_2021]: https://www.iso.org/standard/69084.html
+
+<!-- As the OID4VCI spec is unstable, the link here points to the WG draft. -->
+[OID4VCI]: https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html
+
+[CBOR_ZONE]: https://cbor.zone/

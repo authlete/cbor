@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Authlete, Inc.
+ * Copyright (C) 2023-2024 Authlete, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@ package com.authlete.cose;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -94,5 +96,24 @@ public class COSEKeyTest
 
         // d
         assertEquals(map.get("d"), encodeByBase64Url(ec2Key.getD()));
+    }
+
+
+    @Test
+    public void test_to_public() throws COSEException
+    {
+        // Create a private key.
+        COSEKey privateKey = COSEKey.fromJwk(createJwkMap());
+        assertTrue(privateKey.isPrivate());
+
+        // Create a public key from the private key.
+        COSEKey publicKey = privateKey.toPublic();
+        assertFalse(publicKey.isPrivate());
+
+        assertTrue(publicKey instanceof COSEEC2Key);
+        COSEEC2Key ec2PublicKey = (COSEEC2Key)publicKey;
+
+        // Confirm that the public key does not contain private parts.
+        assertNull(ec2PublicKey.getD());
     }
 }

@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# USAGE
+# -----
+#
+#   generate-cwt-key-proof
+#     --issuer ISSUER   # specifies the identifier of the credential issuer.
+#     --key FILE        # specifies the file containing a private key in the JWK format.
+#     [--client CLIENT] # specifies the identifier of the client application.
+#     [--nonce NONCE]   # specifies the 'c_nonce' value issued by the server.
+#     [--help]          # shows this help text.
+#
+# NOTE
+# ----
+#
+#   Supported key algorithms are ES256, ES384 and ES512 only.
+#
+
+POM_FILE=$(dirname $0)/../pom.xml
+MAIN_CLASS=com.authlete.cwt.CWTKeyProofBuilder
+
+exec mvn -q -f ${POM_FILE} exec:java -Dexec.mainClass=${MAIN_CLASS} -Dexec.args="$*"

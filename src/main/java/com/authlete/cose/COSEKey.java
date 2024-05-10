@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Authlete, Inc.
+ * Copyright (C) 2023-2024 Authlete, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 package com.authlete.cose;
 
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -28,6 +31,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import com.authlete.cbor.CBORBigInteger;
 import com.authlete.cbor.CBORByteArray;
+import com.authlete.cbor.CBORDecoder;
 import com.authlete.cbor.CBORInteger;
 import com.authlete.cbor.CBORItem;
 import com.authlete.cbor.CBORItemList;
@@ -46,7 +50,18 @@ import com.authlete.cose.constants.COSEKeyTypes;
 
 
 /**
- * COSE Key
+ * COSE Key.
+ *
+ * <p>
+ * Subclasses should override the following methods.
+ * </p>
+ *
+ * <ul>
+ * <li>{@link #isPrivate()}
+ * <li>{@link #toPublic()}
+ * <li>{@link #createPrivateKey()}
+ * <li>{@link #createPublicKey()}
+ * </ul>
  *
  * @see 1.1
  *
@@ -354,6 +369,108 @@ public class COSEKey extends CBORPairList
     public boolean isPrivate()
     {
         return false;
+    }
+
+
+    /**
+     * Convert this COSE key to a public key.
+     *
+     * <p>
+     * When this {@code COSEKey} instance is a public key, this method returns
+     * {@code this} object without any modification. Otherwise, this method
+     * creates a new {@code COSEKey} instance representing a public key and
+     * returns the new instance.
+     * </p>
+     *
+     * <p>
+     * The default implementation of this method throws an exception.
+     * Subclasses should override this method.
+     * </p>
+     *
+     * @return
+     *         A {@code COSEKey} instance representing a public key.
+     *
+     * @since 1.15
+     */
+    public COSEKey toPublic() throws COSEException
+    {
+        throw new COSEException("toPublic() is not supported.");
+    }
+
+
+    /**
+     * Create a {@link PrivateKey} instance from this COSE key.
+     *
+     * <p>
+     * The default implementation of this method throws an exception.
+     * Subclasses should override this method.
+     * </p>
+     *
+     * @return
+     *         A {@code PrivateKey} instance.
+     *
+     * @throws COSEException
+     *         The creation failed.
+     *
+     * @since 1.15
+     */
+    public PrivateKey createPrivateKey() throws COSEException
+    {
+        throw new COSEException("createPrivateKey() is not supported.");
+    }
+
+
+    /**
+     * Create a {@link PublicKey} instance from this COSE key.
+     *
+     * <p>
+     * The default implementation of this method throws an exception.
+     * Subclasses should override this method.
+     * </p>
+     *
+     * @return
+     *         A {@code PublicKey} instance.
+     *
+     * @throws COSEException
+     *         The creation failed.
+     *
+     * @since 1.15
+     */
+    public PublicKey createPublicKey() throws COSEException
+    {
+        throw new COSEException("createPublicKey() is not supported.");
+    }
+
+
+    /**
+     * Copy this {@code COSEKey} instance.
+     *
+     * @return
+     *         A new {@code COSEKey} instance that holds the same content
+     *         as this {@code COSEKey} instance does.
+     *
+     * @throws COSEException
+     *         Copying this instance failed.
+     *
+     * @since 1.15
+     */
+    public COSEKey copy() throws COSEException
+    {
+        CBORItem copy;
+
+        try
+        {
+            // Copy this COSEKey instance.
+            copy = new CBORDecoder(encode()).next();
+        }
+        catch (IOException cause)
+        {
+            // This should never happen.
+            throw new COSEException(cause);
+        }
+
+        // Create a new COSEKey instance from the copy.
+        return build(copy);
     }
 
 

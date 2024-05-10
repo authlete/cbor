@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Authlete, Inc.
+ * Copyright (C) 2023-2024 Authlete, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 package com.authlete.cose;
 
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import com.authlete.cbor.CBORBoolean;
@@ -25,6 +28,7 @@ import com.authlete.cbor.CBORByteArray;
 import com.authlete.cbor.CBORInteger;
 import com.authlete.cbor.CBORItem;
 import com.authlete.cbor.CBORPair;
+import com.authlete.cbor.CBORPairList;
 import com.authlete.cbor.CBORPairsBuilder;
 import com.authlete.cbor.CBORString;
 import com.authlete.cose.constants.COSEEllipticCurves;
@@ -183,6 +187,61 @@ public class COSEEC2Key extends COSEKey
 
 
     @Override
+    public COSEKey toPublic() throws COSEException
+    {
+        // If this COSEKey instance represents a public key.
+        if (!isPrivate())
+        {
+            return this;
+        }
+
+        // A pair list that contains only public parts.
+        List<CBORPair> pairs = new ArrayList<>();
+
+        // For each CBORPair that this COSEKey instance holds.
+        for (CBORPair pair : getPairs())
+        {
+            // If the pair is not a private part.
+            if (!isPrivatePart(pair))
+            {
+                // Add the public part.
+                pairs.add(pair);
+            }
+        }
+
+        // Create a new COSEKey instance from the pair list that
+        // does not include private parts. As a result, the newly
+        // created COSEKey instance becomes a public key.
+        return build(new CBORPairList(pairs));
+    }
+
+
+    private static boolean isPrivatePart(CBORPair pair)
+    {
+        return isD(pair);
+    }
+
+
+    private static boolean isD(CBORPair pair)
+    {
+        // The key of the pair.
+        CBORItem key = pair.getKey();
+
+        // If the key is not an integer.
+        if (!(key instanceof CBORInteger))
+        {
+            return false;
+        }
+
+        // Convert the key into a Java integer.
+        int label = ((CBORInteger)key).getValue();
+
+        // True if the label represents "d".
+        return (label == COSEKeyTypeParameters.EC2_D);
+    }
+
+
+    @Override
     protected void addJwkProperties(Map<String, Object> map)
     {
         // crv
@@ -320,6 +379,20 @@ public class COSEEC2Key extends COSEKey
     public ECPublicKey toECPublicKey() throws COSEException
     {
         return ECDSA.createPublicKey(crv, x, y);
+    }
+
+
+    @Override
+    public PrivateKey createPrivateKey() throws COSEException
+    {
+        return toECPrivateKey();
+    }
+
+
+    @Override
+    public PublicKey createPublicKey() throws COSEException
+    {
+        return toECPublicKey();
     }
 
 

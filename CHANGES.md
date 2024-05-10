@@ -1,6 +1,23 @@
 CHANGES
 =======
 
+- `COSEKey` class
+  * Add the `toPublic()` method.
+  * Add the `createPrivateKey()` method.
+  * Add the `createPublicKey()` method.
+  * Add the `copy()` method.
+
+- `COSEEC2Key` class
+  * Override the `toPublic()` method.
+  * Override the `createPrivateKey()` method.
+  * Override the `createPublicKey()` method.
+
+- New types
+  * `CWTKeyProofBuilder` class
+
+- Others
+  * Add the `bin/generate-cwt-key-proof` script.
+
 1.14 (2023-12-24)
 -----------------
 
