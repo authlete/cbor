@@ -1,6 +1,9 @@
 CHANGES
 =======
 
+1.15 (2024-05-11)
+-----------------
+
 - `COSEKey` class
   * Add the `toPublic()` method.
   * Add the `createPrivateKey()` method.
