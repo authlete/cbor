@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Authlete, Inc.
+ * Copyright (C) 2023-2024 Authlete, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.authlete.cbor.CBORByteArray;
 import com.authlete.cbor.CBORDiagnosticNotationParser;
-import com.authlete.cbor.CBORItem;
 import com.authlete.cbor.CBORString;
 import com.authlete.cbor.CBORizer;
 import com.authlete.cose.COSEEC2Key;
@@ -596,7 +596,7 @@ public class IssuerSignedBuilder
         COSEUnprotectedHeader unprotectedHeader = prepareIssuerAuthUnprotectedHeader();
 
         // Payload
-        CBORItem payload = prepareIssuerAuthPayload(issuerNameSpaces);
+        CBORByteArray payload = prepareIssuerAuthPayload(issuerNameSpaces);
 
         // Sig_structure, which is the target to sign.
         SigStructure sigStructure = prepareSigStructure(protectedHeader, payload);
@@ -717,10 +717,26 @@ public class IssuerSignedBuilder
     }
 
 
-    private CBORItem prepareIssuerAuthPayload(IssuerNameSpaces issuerNameSpaces)
+    private CBORByteArray prepareIssuerAuthPayload(IssuerNameSpaces issuerNameSpaces)
     {
-        // MobileSecurityObjectBytes, which is used as the payload of IssuerAuth.
-        CBORItem payload = buildMobileSecurityObjectBytes(issuerNameSpaces);
+        // MobileSecurityObjectBytes = #6.24(bstr .cbor MobileSecurityObject)
+        MobileSecurityObjectBytes msoBytes =
+                buildMobileSecurityObjectBytes(issuerNameSpaces);
+
+        // The definitions of IssuerAuth and MobileSecurityObjectBytes in the
+        // ISO/IEC 18013-5 are as follows:
+        //
+        //     IssuerAuth = COSE_Sign1; The payload is MobileSecurityObjectBytes
+        //
+        //     MobileSecurityObjectBytes = #6.24(bstr .cbor MobileSecurityObject)
+        //
+        // These give the impression that MobileSecurityObjectBytes (which starts
+        // with a CBOR tag) is directly used as the payload of COSE_Sign1.
+        //
+        // However, it is necessary to further convert MobileSecurityObjectBytes
+        // into a byte string.
+        //
+        CBORByteArray payload = new CBORByteArray(msoBytes.encode(), msoBytes);
 
         // Add a comment just for CBORItem.prettify().
         payload.setComment("payload");
@@ -730,7 +746,7 @@ public class IssuerSignedBuilder
 
 
     private SigStructure prepareSigStructure(
-            COSEProtectedHeader protectedHeader, CBORItem payload)
+            COSEProtectedHeader protectedHeader, CBORByteArray payload)
     {
         return new SigStructureBuilder()
                 .signature1()

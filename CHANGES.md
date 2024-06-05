@@ -1,6 +1,25 @@
 CHANGES
 =======
 
+- `IssuerSignedBuilder` class
+  * Fixed a bug in the `prepareIssuerAuthPayload(IssuerNameSpaces)` method.
+    The definitions of `IssuerAuth` and `MobileSecurityObjectBytes` in the
+    ISO/IEC 18013-5 specification give the impression that
+    `MobileSecurityObjectBytes` (which starts with a CBOR tag) is directly
+    used as the payload of `COSE_Sign1`. However, it is necessary to
+    further convert `MobileSecurityObjectBytes` into a byte string.
+
+- `SigStructure` class
+  * Changed the type of the fourth argument (`payload`) of the 4-argument
+    constructor from `CBORItem` to `CBORByteArray`.
+  * Changed the type of the third argument (`payload`) of the 3-argument
+    constructor from `CBORItem` to `CBORByteArray`.
+  * Changed the return type of the `getPayload()` method from `CBORItem` to
+   `CBORByteArray`.
+
+- `SigStructureBuilder` class
+  * Removed the `payload(CBORItem)` method.
+
 1.15 (2024-05-11)
 -----------------
 

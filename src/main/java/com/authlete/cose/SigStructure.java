@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Authlete, Inc.
+ * Copyright (C) 2023-2024 Authlete, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package com.authlete.cose;
 
 
 import com.authlete.cbor.CBORByteArray;
-import com.authlete.cbor.CBORItem;
 import com.authlete.cbor.CBORItemList;
 import com.authlete.cbor.CBORString;
 
@@ -63,14 +62,6 @@ public class SigStructure extends CBORItemList
      * This constructor is for {@code COSE_Sign}.
      * </p>
      *
-     * <p>
-     * The type of the {@code payload} argument has been changed from
-     * {@link CBORByteArray} to {@link CBORItem} since version 1.5. This is
-     * because the <a href="https://www.iso.org/standard/69084.html">ISO/IEC
-     * 18013-5:2021</a> standard requires that the payload start with a tag
-     * instead of a byte string.
-     * </p>
-     *
      * @param bodyAttributes
      *         The protected header of the content. Must not be null.
      *
@@ -83,10 +74,11 @@ public class SigStructure extends CBORItemList
      * @param payload
      *         The payload.
      */
+    @SuppressWarnings("unchecked")
     public SigStructure(
             COSEProtectedHeader bodyAttributes,
             COSEProtectedHeader signerAttributes,
-            CBORByteArray externalData, CBORItem payload)
+            CBORByteArray externalData, CBORByteArray payload)
     {
         super(CONTEXT_SIGNATURE, bodyAttributes, signerAttributes, externalData, payload);
 
@@ -105,14 +97,6 @@ public class SigStructure extends CBORItemList
      * This constructor is for {@code COSE_Sign1}.
      * </p>
      *
-     * <p>
-     * The type of the {@code payload} argument has been changed from
-     * {@link CBORByteArray} to {@link CBORItem} since version 1.5. This is
-     * because the <a href="https://www.iso.org/standard/69084.html">ISO/IEC
-     * 18013-5:2021</a> standard requires that the payload start with a tag
-     * instead of a byte string.
-     * </p>
-     *
      * @param bodyAttributes
      *         The protected header of the content. Must not be null.
      *
@@ -122,9 +106,10 @@ public class SigStructure extends CBORItemList
      * @param payload
      *         The payload.
      */
+    @SuppressWarnings("unchecked")
     public SigStructure(
             COSEProtectedHeader bodyAttributes,
-            CBORByteArray externalData, CBORItem payload)
+            CBORByteArray externalData, CBORByteArray payload)
     {
         super(CONTEXT_SIGNATURE1, bodyAttributes, externalData, payload);
 
@@ -217,15 +202,15 @@ public class SigStructure extends CBORItemList
      * @return
      *         The payload.
      */
-    public CBORItem getPayload()
+    public CBORByteArray getPayload()
     {
         if (isSignature())
         {
-            return getItems().get(4);
+            return (CBORByteArray)getItems().get(4);
         }
         else
         {
-            return getItems().get(3);
+            return (CBORByteArray)getItems().get(3);
         }
     }
 
