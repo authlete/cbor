@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Authlete, Inc.
+ * Copyright (C) 2023-2024 Authlete, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class SigStructureBuilder
     private COSEProtectedHeader bodyAttributes;
     private COSEProtectedHeader signerAttributes;
     private CBORByteArray externalData;
-    private CBORItem payload;
+    private CBORByteArray payload;
 
 
     /**
@@ -210,25 +210,6 @@ public class SigStructureBuilder
 
 
     /**
-     * Set the payload to {@code Sig_structure.payload}.
-     *
-     * @param payload
-     *         The payload to be signed.
-     *
-     * @return
-     *         {@code this} object.
-     *
-     * @since 1.5
-     */
-    public SigStructureBuilder payload(CBORItem payload)
-    {
-        this.payload = payload;
-
-        return this;
-    }
-
-
-    /**
      * Set some fields of {@code Sig_structure} based on the given
      * {@link COSESign} object that represents {@code COSE_Sign}
      * which is defined in <a href=
@@ -271,7 +252,7 @@ public class SigStructureBuilder
 
         if (payload != null && !(payload instanceof CBORNull))
         {
-            payload(payload);
+            payload((CBORByteArray)payload);
         }
 
         return this;
@@ -349,7 +330,7 @@ public class SigStructureBuilder
 
         if (payload != null && !(payload instanceof CBORNull))
         {
-            payload(payload);
+            payload((CBORByteArray)payload);
         }
 
         return this;
