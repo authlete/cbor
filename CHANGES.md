@@ -1,6 +1,9 @@
 CHANGES
 =======
 
+1.16 (2024-06-05)
+-----------------
+
 - `IssuerSignedBuilder` class
   * Fixed a bug in the `prepareIssuerAuthPayload(IssuerNameSpaces)` method.
     The definitions of `IssuerAuth` and `MobileSecurityObjectBytes` in the
