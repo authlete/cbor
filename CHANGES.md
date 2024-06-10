@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+1.17 (2024-06-10)
+-----------------
+
+- `CWTKeyProofBuilder` class
+  * Fixed a bug in the `buildProtectedHeader(COSEKey)` method. A COSE key
+    should be wrapped into a byte string before being embedded in the
+    protected header.
+
 1.16 (2024-06-05)
 -----------------
 
