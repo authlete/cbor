@@ -528,10 +528,17 @@ public class CWTKeyProofBuilder
         //     ordered array of X.509 certificates corresponding to the key used
         //     to sign the CWT. It MUST NOT be present if COSE_Key is present.
         //
+
+        // Convert the private key to the corresponding public key.
+        COSEKey pubKey = key.toPublic();
+
+        // Wrap the public key into a byte string.
+        CBORByteArray pubKeyEmbedded = new CBORByteArray(pubKey.encode(), pubKey);
+
         return new COSEProtectedHeaderBuilder()
                 .alg(key.getAlg())
                 .contentType(CONTENT_TYPE)
-                .put(LABEL_COSE_KEY, key.toPublic())
+                .put(LABEL_COSE_KEY, pubKeyEmbedded)
                 .build();
     }
 
