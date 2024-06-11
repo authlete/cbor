@@ -1,6 +1,10 @@
 CHANGES
 =======
 
+- `CWTKeyProofBuilder` class
+  * Added a new command line option `--issued-at TIME` which specifies
+    the issuance time.
+
 1.17 (2024-06-10)
 -----------------
 

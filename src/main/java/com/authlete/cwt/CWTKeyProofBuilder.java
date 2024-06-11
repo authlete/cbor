@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 import com.authlete.cbor.CBORByteArray;
@@ -58,12 +59,16 @@ import com.google.gson.ToNumberPolicy;
  * // this private key will be embedded in the protected header.</span>
  * COSEKey key = ...;
  *
+ * <span style="color: darkgreen;">// The issuance time. When omitted, the current time is used.</span>
+ * Date iat = new Date();
+ *
  * <span style="color: darkgreen;">// Generate a CWT representing a key proof.</span>
  * {@link CWT} cwt = new CWTKeyProofBuilder()
  *     .{@link #setClient(String) setClient}(client)
  *     .{@link #setIssuer(String) setIssuer}(issuer)
  *     .{@link #setNonce(String) setNonce}(nonce)
  *     .{@link #setKey(COSEKey) setKey}(key)
+ *     .{@link #setIssuedAt(Date) setIssuedAt}(iat)
  *     .{@link #build()};
  *
  * <span style="color: darkgreen;">// The base64url representation of the key proof.</span>
@@ -76,12 +81,13 @@ import com.google.gson.ToNumberPolicy;
  *
  * <div  style="border: 1px solid black; padding: 1em; margin: 1em;"">
  * <code><span style="word-break: break-all;"><!--
- * -->2D3ShFidowEmA3RvcGVuaWQ0dmNpLXByb29mK2N3dGhDT1NFX0tleaYBAgJYK0pvWWcwSm<!--
- * -->NhS1VPN00zRDlfUVR1UjR4Zl90MWhZZkNsVG95cS05dC1oWXMDJiABIVgguNp2r4R7DNp3<!--
- * -->gPrnhtc93CY7gSDRdMwTris8ZPoeCGQiWCBFEpNEFZfxlYyevnC8dY9KOVjQhqAOyI7m5X<!--
- * -->tohBHbO6BYR6QDeCVodHRwczovL2NyZWRlbnRpYWwtaXNzdWVyLmV4YW1wbGUuY29tBhpm<!--
- * -->PeFaAWxteV9jbGllbnRfaWQKSG15X25vbmNlWEB6nBjmxfuVI7LVcQKXggEATC-AVN_5Vi<!--
- * -->fZEC6NLJL-vpFaAppWRgW5QkDmTouV7WGDnXoomamaWzazgVgcvrWo</span></code>
+ * -->2D3ShFifowEmA3RvcGVuaWQ0dmNpLXByb29mK2N3dGhDT1NFX0tleVh7pgECAlgrMWU1QV<!--
+ * -->k5RXlCMDFYblV6YTZMcEp6azAybjZZX0FtbW5TYjBGQmVOVlZyVQMmIAEhWCA9LFCsPbOX<!--
+ * -->T-ZdwCrPWaCpJ4GgGGebHbLEESmsFjwXbSJYIMVfH24tRUqLFLpy3rizbi5CYqpmOkyojJ<!--
+ * -->7q_hp9sEddoFhgpAFsdHJhY2sxX2xpZ2h0A3gaaHR0cHM6Ly90cmlhbC5hdXRobGV0ZS5u<!--
+ * -->ZXQGGmZf3KsKWCt2LTFiLW44MmtFSkdiSFJPU2VrR3NtUi14RXVhbUN4WV9UMHRYdFFOLW<!--
+ * -->RZWEB0XIuOQg2CoiLJF99zotTqM80A0i5riMSgKMYzhqfAEckD2BEDIdX1X6ySkRPOAt1f<!--
+ * -->tsy3HLXqg4DAPOldPZOP</span></code>
  * </div>
  *
  * <p>
@@ -98,21 +104,31 @@ import com.google.gson.ToNumberPolicy;
  *     {
  *       1: -7,
  *       3: "openid4vci-proof+cwt",
- *       "COSE_Key": {
- *         1: 2,
- *         2: h'4a6f5967304a63614b554f374d3344395f515475523478665f7431685966436c546f79712d39742d685973',
- *         3: -7,
- *         -1: 1,
- *         -2: h'b8da76af847b0cda7780fae786d73ddc263b8120d174cc13ae2b3c64fa1e0864',
- *         -3: h'451293441597f1958c9ebe70bc758f4a3958d086a00ec88ee6e57b688411db3b'
- *       }
+ *       "COSE_Key": h'a6010202582b3165354159394579423031586e557a61364c704a7a6b30326e36595f416d6d6e5362304642654e56567255032620012158203d2c50ac3db3974fe65dc02acf59a0a92781a018679b1db2c41129ac163c176d225820c55f1f6e2d454a8b14ba72deb8b36e2e4262aa663a4ca88c9eeafe1a7db0475d'
  *     }
  *   >>,
  *   / unprotected / {
  *   },
- *   h'a403782568747470733a2f2f63726564656e7469616c2d6973737565722e6578616d706c652e636f6d061a663de15a016c6d795f636c69656e745f69640a486d795f6e6f6e6365',
- *   h'7a9c18e6c5fb9523b2d57102978201004c2f8054dff95627d9102e8d2c92febe915a029a564605b94240e64e8b95ed61839d7a2899a99a5b36b381581cbeb5a8'
+ *   h'a4016c747261636b315f6c6967687403781a68747470733a2f2f747269616c2e617574686c6574652e6e6574061a665fdcab0a582b762d31622d6e38326b454a476248524f53656b47736d522d784575616d4378595f5430745874514e2d6459',
+ *   h'745c8b8e420d82a222c917df73a2d4ea33cd00d22e6b88c4a028c63386a7c011c903d8110321d5f55fac929113ce02dd5fb6ccb71cb5ea8380c03ce95d3d938f'
  * ]))
+ * </pre>
+ *
+ * <p>
+ * The value of {@code "COSE_Key"} in the protected header is a byte string,
+ * which wraps the COSE key. The content of the byte string is decoded as
+ * follows:
+ * </p>
+ *
+ * <pre style="border: 1px solid black; padding: 1em 0 0; margin: 1em;">
+ * {
+ *   1: 2,
+ *   2: h'3165354159394579423031586e557a61364c704a7a6b30326e36595f416d6d6e5362304642654e56567255',
+ *   3: -7,
+ *   -1: 1,
+ *   -2: h'3d2c50ac3db3974fe65dc02acf59a0a92781a018679b1db2c41129ac163c176d',
+ *   -3: h'c55f1f6e2d454a8b14ba72deb8b36e2e4262aa663a4ca88c9eeafe1a7db0475d'
+ * }
  * </pre>
  *
  * <p>
@@ -158,10 +174,11 @@ public class CWTKeyProofBuilder
 
     private CWTKeyProofBuilder(Options options)
     {
-        this.client = options.client;
-        this.issuer = options.issuer;
-        this.nonce  = options.nonce;
-        this.key    = options.key;
+        this.client   = options.client;
+        this.issuer   = options.issuer;
+        this.nonce    = options.nonce;
+        this.key      = options.key;
+        this.issuedAt = options.issuedAt;
     }
 
 
@@ -717,6 +734,22 @@ public class CWTKeyProofBuilder
      *   </td>
      * </tr>
      * <tr>
+     *   <td><nobr><code>--issued-at <i>TIME</i></code></nobr></td>
+     *   <td>
+     *     <p>
+     *       OPTIONAL. This option specifies the issuance time by using one of the
+     *       following formats:
+     *     </p>
+     *     <ol type="a">
+     *       <li>integer representing seconds since the Unix epoch
+     *       <li>string representing a datetime in UTC in the ISO 8601 format
+     *     </ol>
+     *     <p>
+     *       When this option is omitted, the current time is used as the issuance time.
+     *     </p>
+     *   </td>
+     * </tr>
+     * <tr>
      *   <td><code>--help</code></td>
      *   <td>
      *     <p>
@@ -763,13 +796,17 @@ public class CWTKeyProofBuilder
     private static final String HELP =
             "USAGE:%n%n" +
             "  java %s%n" +
-            "    --issuer ISSUER   # specifies the identifier of the credential issuer.%n" +
-            "    --key FILE        # specifies the file containing a private key in the JWK format.%n" +
-            "    [--client CLIENT] # specifies the identifier of the client application.%n" +
-            "    [--nonce NONCE]   # specifies the 'c_nonce' value issued by the server.%n" +
-            "    [--help]          # shows this help text.%n%n" +
+            "    --issuer ISSUER    # specifies the identifier of the credential issuer.%n" +
+            "    --key FILE         # specifies the file containing a private key in the JWK format.%n" +
+            "    [--client CLIENT]  # specifies the identifier of the client application.%n" +
+            "    [--nonce NONCE]    # specifies the 'c_nonce' value issued by the server.%n" +
+            "    [--issued-at TIME] # specifies the issuance time.%n" +
+            "    [--help]           # shows this help text.%n%n" +
             "NOTE:%n%n" +
-            "  Supported key algorithms are ES256, ES384 and ES512 only.%n%n"
+            "  Supported key algorithms are ES256, ES384 and ES512 only.%n%n" +
+            "  The issuance time can be specified by one of the following formats:%n" +
+            "    (a) integer representing seconds since the Unix epoch%n" +
+            "    (b) string representing a datetime in UTC in the ISO 8601 format%n%n"
             ;
 
 
@@ -779,6 +816,7 @@ public class CWTKeyProofBuilder
         public String issuer;
         public String nonce;
         public COSEKey key;
+        public Date issuedAt;
 
 
         public Options process(String[] args) throws IOException, COSEException
@@ -813,6 +851,11 @@ public class CWTKeyProofBuilder
                     case "--key":
                         String file = next(arg, args, ++i);
                         key = readKey(file);
+                        break;
+
+                    case "--issued-at":
+                        String issuedAtStr = next(arg, args, ++i);
+                        issuedAt = readIssuedAt(issuedAtStr);
                         break;
 
                     case "--help":
@@ -863,10 +906,44 @@ public class CWTKeyProofBuilder
         }
 
 
+        private Date readIssuedAt(String issuedAtStr)
+        {
+            try
+            {
+                // Try to parse the input string as an integer representing
+                // seconds since the Unix epoch.
+                long seconds = Long.parseLong(issuedAtStr);
+
+                // Convert the seconds into milliseconds, and create a Date instance.
+                return new Date(seconds * 1000L);
+            }
+            catch (Exception cause)
+            {
+                // Failed to parse the input string as an integer.
+            }
+
+            try
+            {
+                // Try to parse the input string as a string representing
+                // a datetime in UTC in the ISO 8601 format.
+                Instant instant = Instant.parse(issuedAtStr);
+
+                // Convert the Instant instance to a Date instance.
+                return Date.from(instant);
+            }
+            catch (Exception cause)
+            {
+                // The value specified by the '--issued-at' option is malformed.
+                throw new IllegalArgumentException(String.format(
+                        "The value specified by the '--issued-at' option is malformed: %s", issuedAtStr));
+            }
+        }
+
+
         private void help(int exitStatus)
         {
             // Show the help text.
-            System.out.format(HELP, getClass().getName());
+            System.out.format(HELP, CWTKeyProofBuilder.class.getName());
             System.exit(exitStatus);
         }
 

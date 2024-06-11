@@ -4,16 +4,21 @@
 # -----
 #
 #   generate-cwt-key-proof
-#     --issuer ISSUER   # specifies the identifier of the credential issuer.
-#     --key FILE        # specifies the file containing a private key in the JWK format.
-#     [--client CLIENT] # specifies the identifier of the client application.
-#     [--nonce NONCE]   # specifies the 'c_nonce' value issued by the server.
-#     [--help]          # shows this help text.
+#     --issuer ISSUER    # specifies the identifier of the credential issuer.
+#     --key FILE         # specifies the file containing a private key in the JWK format.
+#     [--client CLIENT]  # specifies the identifier of the client application.
+#     [--nonce NONCE]    # specifies the 'c_nonce' value issued by the server.
+#     [--issued-at TIME] # specifies the issuance time.
+#     [--help]           # shows this help text.
 #
 # NOTE
 # ----
 #
 #   Supported key algorithms are ES256, ES384 and ES512 only.
+#
+#   The issuance time can be specified by one of the following formats:
+#     (a) integer representing seconds since the Unix epoch
+#     (b) string representing a datetime in UTC in the ISO 8601 format
 #
 
 POM_FILE=$(dirname $0)/../pom.xml
