@@ -15,13 +15,16 @@ public class BouncyCastleLoader {
 
     public static void ensureBouncyCastleProviderIsLoaded()
     {
-        if (isBouncyCastleProviderLoaded) {
+        if (isBouncyCastleProviderLoaded)
+        {
             // The BouncyCastleProvider has already been loaded.
             return;
         }
-        for (Provider provider : Security.getProviders()) {
+        for (Provider provider : Security.getProviders())
+        {
             // If the BouncyCastleProvider has already been loaded somewhere else.
-            if (provider instanceof BouncyCastleProvider) {
+            if (provider instanceof BouncyCastleProvider)
+            {
                 isBouncyCastleProviderLoaded = true;
                 return;
             }
