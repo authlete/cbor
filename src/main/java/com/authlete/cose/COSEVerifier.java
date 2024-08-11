@@ -383,8 +383,8 @@ public class COSEVerifier
             case COSEAlgorithms.ES384:
             case COSEAlgorithms.ES512:
                 return ECDSA.verify(key, alg, data, signature);
-
-            // TODO
+            case COSEAlgorithms.EdDSA:
+                return EdDSA.verify(key, data, signature);
 
             default:
                 throw new COSEException(String.format(
