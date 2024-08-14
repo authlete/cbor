@@ -26,9 +26,7 @@ import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.Provider;
 import java.security.PublicKey;
-import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.interfaces.ECPrivateKey;
@@ -39,7 +37,6 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import com.authlete.cose.constants.COSEAlgorithms;
 import com.authlete.cose.constants.COSEEllipticCurves;
 
@@ -57,7 +54,6 @@ class ECDSA
     private static final BigInteger TWO   = new BigInteger("2");
     private static final BigInteger THREE = new BigInteger("3");
     private static final boolean beforeJre9;
-    private static boolean isBouncyCastleProviderLoaded;
     private static Method sSqrtAndRemainder;
 
 
@@ -503,26 +499,7 @@ class ECDSA
             return;
         }
 
-        if (isBouncyCastleProviderLoaded)
-        {
-            // The BouncyCastleProvider has already been loaded.
-            return;
-        }
-
-        for (Provider provider : Security.getProviders())
-        {
-            // If the BouncyCastleProvider has already been loaded somewhere else.
-            if (provider instanceof BouncyCastleProvider)
-            {
-                isBouncyCastleProviderLoaded = true;
-                return;
-            }
-        }
-
-        // Load the BouncyCastleProvider.
-        Security.addProvider(new BouncyCastleProvider());
-
-        isBouncyCastleProviderLoaded = true;
+        BouncyCastleLoader.ensureBouncyCastleProviderIsLoaded();
     }
 
 

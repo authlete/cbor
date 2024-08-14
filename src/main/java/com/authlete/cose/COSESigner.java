@@ -192,8 +192,8 @@ public class COSESigner
             case COSEAlgorithms.ES384:
             case COSEAlgorithms.ES512:
                 return ECDSA.sign(key, alg, data);
-
-            // TODO
+            case COSEAlgorithms.EdDSA:
+                return EdDSA.sign(key, data);
 
             default:
                 throw new COSEException(String.format(

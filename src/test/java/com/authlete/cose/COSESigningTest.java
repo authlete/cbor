@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.text.ParseException;
@@ -363,6 +365,53 @@ public class COSESigningTest
         assertTrue(valid, "Signature verification failed.");
     }
 
+    @Test
+    public void test_signing_eddsa_01() throws COSEException, NoSuchAlgorithmException
+    {
+        KeyPair keyPair = EdDSA.generateKeyPair();
+        // Signature algorithm
+        int algorithm = COSEAlgorithms.EdDSA;
+
+        // Protected header
+        COSEProtectedHeader protectedHeader =
+                new COSEProtectedHeaderBuilder().alg(algorithm).build();
+
+        // Unprotected header
+        COSEUnprotectedHeader unprotectedHeader =
+                new COSEUnprotectedHeaderBuilder().kid("11").build();
+
+        // Payload
+        String payload = "This is the content signed with EdDSA.";
+
+        // Sig_structure
+        SigStructure structure = new SigStructureBuilder()
+                .signature1()
+                .bodyAttributes(protectedHeader)
+                .payload(payload)
+                .build();
+
+        // Signer
+        COSESigner signer = new COSESigner(keyPair.getPrivate());
+
+        // Signature
+        byte[] signature = signer.sign(structure, algorithm);
+
+        // COSESign1
+        COSESign1 sign1 = new COSESign1Builder()
+                .protectedHeader(protectedHeader)
+                .unprotectedHeader(unprotectedHeader)
+                .payload(payload)
+                .signature(signature)
+                .build();
+
+        // Verifier
+        COSEVerifier verifier = new COSEVerifier(keyPair.getPublic());
+
+        // Verification
+        boolean valid = verifier.verify(sign1);
+
+        assertTrue(valid, "Signature verification failed.");
+    }
 
     @Test
     public void test_ec2_private_jwk()
