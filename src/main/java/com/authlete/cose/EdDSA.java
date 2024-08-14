@@ -1,11 +1,26 @@
 package com.authlete.cose;
 
-import java.security.*;
+
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+
 
 /**
  * EdDSA operations
+ *
+ * @since 1.19
+ *
+ * @see <a href="https://github.com/authlete/cbor/pull/11"
+ *      >PR 11: [feature] Added support for EdDSA signing/verify</a>
  */
-public class EdDSA {
+class EdDSA {
 
     private static final Integer FIFTEEN = 15;
     private static final boolean beforeJre15 = isBeforeJre15();

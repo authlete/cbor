@@ -16,6 +16,7 @@ be added as the need arises.
     - [x] `ES256`
     - [x] `ES384`
     - [x] `ES512`
+    - [x] `EdDSA`
     - [ ] ?
   - [ ] Encryption
   - [ ] MAC

@@ -1,15 +1,20 @@
 package com.authlete.cose;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.Provider;
 import java.security.Security;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 
 /**
  * A utility class to load the BouncyCastleProvider.
+ *
+ * @since 1.19
+ *
+ * @see <a href="https://github.com/authlete/cbor/pull/11"
+ *      >PR 11: [feature] Added support for EdDSA signing/verify</a>
  */
-public class BouncyCastleLoader {
+class BouncyCastleLoader {
 
     private static boolean isBouncyCastleProviderLoaded;
 

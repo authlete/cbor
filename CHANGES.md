@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+1.19 (2024-08-14)
+-----------------
+
+- `COSESigner` class
+  * Added support for EdDSA (PR #11).
+
+- `COSEVerifier` class
+  * Added support for EdDSA (PR #11).
+
+- New types
+  * `BouncyCastleLoader` class (PR #11)
+  * `EdDSA` class (PR #11)
+
 1.18 (2024-06-11)
 -----------------
 
