@@ -132,6 +132,6 @@ public class CBORTaggedItem extends CBORItem
     @Override
     public Object parse()
     {
-        return tagContent.parse();
+        return tagContent.parse(tagNumber);
     }
 }
