@@ -21,7 +21,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.ECPrivateKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,13 +37,13 @@ import com.authlete.cose.COSEProtectedHeader;
 import com.authlete.cose.COSEProtectedHeaderBuilder;
 import com.authlete.cose.COSESign1;
 import com.authlete.cose.COSESign1Builder;
-import com.authlete.cose.COSESigner;
 import com.authlete.cose.COSEUnprotectedHeader;
 import com.authlete.cose.COSEUnprotectedHeaderBuilder;
 import com.authlete.cose.SigStructure;
 import com.authlete.cose.SigStructureBuilder;
 import com.authlete.cose.constants.COSEAlgorithms;
 import com.authlete.cose.constants.COSEEllipticCurves;
+import com.authlete.mdoc.interfaces.SigStructureSigner;
 
 
 /**
@@ -63,7 +62,7 @@ public class IssuerSignedBuilder
 {
     private static final SecureRandom RANDOM = new SecureRandom();
 
-
+    private SigStructureSigner mSigner;
     private String mDocType;
     private Map<String, Object> mClaims;
     private ValidityInfo mValidityInfo;
@@ -72,6 +71,12 @@ public class IssuerSignedBuilder
     private List<X509Certificate> mIssuerCertChain;
     private CBORizer mCBORizer;
 
+    public IssuerSignedBuilder() {}
+
+    public IssuerSignedBuilder(SigStructureSigner signer)
+    {
+        mSigner = signer;
+    }
 
     /**
      * Get the DocType.
@@ -111,6 +116,15 @@ public class IssuerSignedBuilder
         return this;
     }
 
+    public IssuerSignedBuilder setSigner(SigStructureSigner mSigner) {
+        this.mSigner = mSigner;
+
+        return this;
+    }
+
+    public SigStructureSigner getSigner() {
+        return mSigner;
+    }
 
     /**
      * Get the claims used to create {@link IssuerSignedItem}s.
@@ -758,14 +772,12 @@ public class IssuerSignedBuilder
 
     private byte[] sign(SigStructure sigStructure, int alg) throws COSEException
     {
-        // The private key for signing.
-        ECPrivateKey privateKey = getIssuerKey().toECPrivateKey();
-
-        // Create a signer with the private key.
-        COSESigner signer = new COSESigner(privateKey);
+        if(this.mSigner == null) {
+            this.mSigner = new InternalSigStructureSigner(getIssuerKey());
+        }
 
         // Sign the Sig_structure (= generate a signature).
-        return signer.sign(sigStructure, alg);
+        return mSigner.sign(sigStructure, alg);
     }
 
 
