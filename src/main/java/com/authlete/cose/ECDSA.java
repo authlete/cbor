@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Authlete, Inc.
+ * Copyright (C) 2023-2025 Authlete, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,14 @@ class ECDSA
         ECParameterSpec paramSpec = getParameterSpec(crv);
 
         // Key spec for the private key.
-        return new ECPrivateKeySpec(new BigInteger(d), paramSpec);
+        //
+        // The first argument of the BigInteger constructor is used to ensure
+        // that the private key value is non-negative. For details, see Issue 15.
+        //
+        //   Issue 15: JDK 21 and InvalidKeyException: The private key must be within the range [1, n - 1]
+        //   https://github.com/authlete/cbor/issues/15
+        //
+        return new ECPrivateKeySpec(new BigInteger(1, d), paramSpec);
     }
 
 
