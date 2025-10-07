@@ -1,6 +1,9 @@
 CHANGES
 =======
 
+1.20 (2025-10-07)
+-----------------
+
 - `COSESigner` class
   * Implemented the `SigStructureSigner` interface.
 
