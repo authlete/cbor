@@ -1,6 +1,22 @@
 CHANGES
 =======
 
+- `COSESigner` class
+  * Implemented the `SigStructureSigner` interface.
+
+- `IssuerSignedBuilder` class
+  * Added a new feature to sign the Issuer Auth Structure
+    with a custom signer. (Issue #13)
+  * Added the `getIssuerAuthSigner()` method.
+  * Added the `setIssuerAuthSigner(SigStructureSigner)` method.
+
+- `ECDSA` class
+  * Fix a bug in the `createPrivateKeySpec(Object, byte[])` method.
+    An EC private key must be non-negative. (Issue #15)
+
+- New types
+  * `SigStructureSigner` interface.
+
 1.19 (2024-08-14)
 -----------------
 
