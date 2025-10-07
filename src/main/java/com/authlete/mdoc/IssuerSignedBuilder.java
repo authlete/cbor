@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2024 Authlete, Inc.
+ * Copyright (C) 2023-2025 Authlete, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import com.authlete.cose.COSEUnprotectedHeader;
 import com.authlete.cose.COSEUnprotectedHeaderBuilder;
 import com.authlete.cose.SigStructure;
 import com.authlete.cose.SigStructureBuilder;
+import com.authlete.cose.SigStructureSigner;
 import com.authlete.cose.constants.COSEAlgorithms;
 import com.authlete.cose.constants.COSEEllipticCurves;
 
@@ -71,6 +72,7 @@ public class IssuerSignedBuilder
     private COSEEC2Key mIssuerKey;
     private List<X509Certificate> mIssuerCertChain;
     private CBORizer mCBORizer;
+    private SigStructureSigner mIssuerAuthSigner;
 
 
     /**
@@ -304,11 +306,22 @@ public class IssuerSignedBuilder
      * Set the issuer key used to sign the {@code IssuerAuth} structure
      * ({@link COSESign1}).
      *
+     * <p>
+     * If a signer is not provided through the
+     * {@link #setIssuerAuthSigner(SigStructureSigner)} method, a private key
+     * must be set. Conversely, if a signer is provided, a key still needs to
+     * be set, but it does not necessarily have to be a private key. In this
+     * case, the key set by this method is not used for signing the Issuer
+     * Auth structure.
+     * </p>
+     *
      * @param issuerKey
      *         The issuer key.
      *
      * @return
      *         {@code this} object.
+     *
+     * @see #setIssuerAuthSigner(SigStructureSigner)
      */
     public IssuerSignedBuilder setIssuerKey(COSEEC2Key issuerKey)
     {
@@ -407,6 +420,49 @@ public class IssuerSignedBuilder
     public IssuerSignedBuilder setCBORizer(CBORizer cborizer)
     {
         mCBORizer = cborizer;
+
+        return this;
+    }
+
+
+    /**
+     * Get the signer to sign the Issuer Auth structure.
+     *
+     * @return
+     *         The signer to sign the Issuer Auth structure.
+     *
+     * @since 1.20
+     */
+    public SigStructureSigner getIssuerAuthSigner()
+    {
+        return mIssuerAuthSigner;
+    }
+
+
+    /**
+     * Set the signer to sign the Issuer Auth structure.
+     *
+     * <p>
+     * If a signer is provided through this method, it will be used to sign the
+     * Issuer Auth structure. Conversely, if no signer is provided, a new
+     * {@link COSESigner} instance will be created with the private key set by
+     * the {@link #setIssuerKey(COSEEC2Key)} method, and the instance will be
+     * used to sign the Issuer Auth structure.
+     * </p>
+     *
+     * @param signer
+     *         The signer to sign the Issuer Auth structure.
+     *
+     * @return
+     *         {@code this} object.
+     *
+     * @see #setIssuerKey(COSEEC2Key)
+     *
+     * @since 1.20
+     */
+    public IssuerSignedBuilder setIssuerAuthSigner(SigStructureSigner signer)
+    {
+        mIssuerAuthSigner = signer;
 
         return this;
     }
@@ -758,14 +814,29 @@ public class IssuerSignedBuilder
 
     private byte[] sign(SigStructure sigStructure, int alg) throws COSEException
     {
+        // Determine the signer.
+        SigStructureSigner signer = determineSigner();
+
+        // Sign the Sig_structure (= generate a signature).
+        return signer.sign(sigStructure, alg);
+    }
+
+
+    private SigStructureSigner determineSigner() throws COSEException
+    {
+        SigStructureSigner signer = getIssuerAuthSigner();
+
+        // If a signer has been provided.
+        if (signer != null)
+        {
+            return signer;
+        }
+
         // The private key for signing.
         ECPrivateKey privateKey = getIssuerKey().toECPrivateKey();
 
         // Create a signer with the private key.
-        COSESigner signer = new COSESigner(privateKey);
-
-        // Sign the Sig_structure (= generate a signature).
-        return signer.sign(sigStructure, alg);
+        return new COSESigner(privateKey);
     }
 
 

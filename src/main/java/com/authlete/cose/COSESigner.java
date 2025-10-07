@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Authlete, Inc.
+ * Copyright (C) 2023-2025 Authlete, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import com.authlete.cose.constants.COSEKeyOperations;
  * @see <a href="https://www.rfc-editor.org/rfc/rfc9052.html#section-4"
  *      >RFC 9052, 4. Signing Objects</a>
  */
-public class COSESigner
+public class COSESigner implements SigStructureSigner
 {
     private final Key key;
     private final KeyGetter keyGetter;
@@ -97,6 +97,7 @@ public class COSESigner
      *
      * @throws COSEException
      */
+    @Override
     public byte[] sign(SigStructure structure, int algorithm) throws COSEException
     {
         return sign(structure, algorithm, (byte[])null);
