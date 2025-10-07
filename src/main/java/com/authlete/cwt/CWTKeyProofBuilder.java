@@ -79,7 +79,7 @@ import com.google.gson.ToNumberPolicy;
  * The variable "{@code base64url}" in the example above holds a value like below.
  * </p>
  *
- * <div  style="border: 1px solid black; padding: 1em; margin: 1em;"">
+ * <div style="border: 1px solid black; padding: 1em; margin: 1em;">
  * <code><span style="word-break: break-all;"><!--
  * -->2D3ShFifowEmA3RvcGVuaWQ0dmNpLXByb29mK2N3dGhDT1NFX0tleVh7pgECAlgrMWU1QV<!--
  * -->k5RXlCMDFYblV6YTZMcEp6azAybjZZX0FtbW5TYjBGQmVOVlZyVQMmIAEhWCA9LFCsPbOX<!--
@@ -100,13 +100,13 @@ import com.google.gson.ToNumberPolicy;
  *
  * <pre style="border: 1px solid black; padding: 1em 0 0; margin: 1em;">
  * 61(18(/ COSE_Sign1 / [
- *   / protected / <<
+ *   / protected / &lt;&lt;
  *     {
  *       1: -7,
  *       3: "openid4vci-proof+cwt",
  *       "COSE_Key": h'a6010202582b3165354159394579423031586e557a61364c704a7a6b30326e36595f416d6d6e5362304642654e56567255032620012158203d2c50ac3db3974fe65dc02acf59a0a92781a018679b1db2c41129ac163c176d225820c55f1f6e2d454a8b14ba72deb8b36e2e4262aa663a4ca88c9eeafe1a7db0475d'
  *     }
- *   >>,
+ *   &gt;&gt;,
  *   / unprotected / {
  *   },
  *   h'a4016c747261636b315f6c6967687403781a68747470733a2f2f747269616c2e617574686c6574652e6e6574061a665fdcab0a582b762d31622d6e38326b454a476248524f53656b47736d522d784575616d4378595f5430745874514e2d6459',
@@ -148,8 +148,8 @@ import com.google.gson.ToNumberPolicy;
  *
  * @since 1.15
  *
- * @see <a href="https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-wg-draft.html"
- *      >OpenID for Verifiable Credential Issuance</a>
+ * @see <a href="https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html"
+ *      >OpenID for Verifiable Credential Issuance 1.0</a>
  */
 public class CWTKeyProofBuilder
 {

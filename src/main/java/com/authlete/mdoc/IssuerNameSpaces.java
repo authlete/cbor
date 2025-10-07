@@ -41,7 +41,7 @@ import com.authlete.cbor.CBORPairList;
  *
  * @see IssuerSigned
  *
- * @see IssuerNamesSpacesEntry
+ * @see IssuerNameSpacesEntry
  */
 public class IssuerNameSpaces extends CBORPairList
 {

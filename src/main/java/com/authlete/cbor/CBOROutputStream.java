@@ -267,7 +267,7 @@ public class CBOROutputStream extends FilterOutputStream
      * {@code encode(OutputStream)} method with this output stream.
      * </p>
      *
-     * @param value
+     * @param collection
      *         A value to be encoded and written into this output stream.
      *
      * @return
@@ -295,7 +295,7 @@ public class CBOROutputStream extends FilterOutputStream
      * {@code encode(OutputStream)} method with this output stream.
      * </p>
      *
-     * @param value
+     * @param map
      *         A value to be encoded and written into this output stream.
      *
      * @return
@@ -323,7 +323,7 @@ public class CBOROutputStream extends FilterOutputStream
      * {@code encode(OutputStream)} method with this output stream.
      * </p>
      *
-     * @param value
+     * @param object
      *         A value to be encoded and written into this output stream.
      *
      * @return
