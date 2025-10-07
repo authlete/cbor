@@ -196,6 +196,31 @@ public class CBORParsingTest
         assertArrayEquals(expected, (byte[])object);
     }
 
+    @Test
+    public void test_byte_array_cbor() throws IOException
+    {
+        // === byte[] ===
+        //
+        // CBOR data item representing tagged CBOR data
+        // encoded d818456449455446.
+        //
+        //   major = 24  ; byte string
+        //
+        byte[] input = {
+                (byte)0xd8, (byte)0x18, (byte)0x45, (byte)0x64,
+                (byte)0x49, (byte)0x45, (byte)0x54, (byte)0x46
+        };
+
+        // Expected result.
+        String expected ="IETF";
+
+        // Parse the CBOR data item.
+        Object object = new CBORParser(input).next();
+
+        // The object should be a String instance.
+        assertSame(String.class, object.getClass());
+        assertEquals(expected, (String)object);
+    }
 
     @Test
     public void test_string() throws IOException

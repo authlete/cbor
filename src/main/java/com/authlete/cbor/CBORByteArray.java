@@ -18,6 +18,7 @@ package com.authlete.cbor;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -313,6 +314,24 @@ public class CBORByteArray extends CBORValue<byte[]>
         }
     }
 
+    @Override
+    protected Object parse(Number tagNumber) {
+        if (!isEncodedCborDataItem(tagNumber)) {
+            return getValue();
+        }
+        List<? extends CBORItem> items = prepareDecodedContent();
+        if (items != null) {
+            if (items.size() > 1) {
+            List<Object> list = new ArrayList<>();
+            items.stream().map(CBORItem::parse).forEachOrdered(list::add);
+            return list;
+            } else {
+               return items.get(0).parse();
+            }
+        } else {
+            return getValue();
+        }
+    }
 
     private String prettifyString(String comment)
     {
