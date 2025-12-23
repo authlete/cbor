@@ -79,6 +79,22 @@ public abstract class CBORItem
      */
     public abstract Object parse();
 
+    /**
+     * Convert this {@link CBORItem} instance into an instance of a common Java class. The default
+     * implementation of this method calls the {@code parse()} method.
+     *
+     * @param tagNumber
+     *         The tag number of the tag wrapping this CBOR item. If this CBOR
+     *         item is not wrapped, {@code null} is passed.
+     *
+     * @return
+     *         An instance of a common Java class that represents this CBOR data item.
+     */
+    protected Object parse(Number tagNumber)
+    {
+        return parse();
+    }
+
 
     /**
      * Write the CBOR representation of this instance into the output stream.
